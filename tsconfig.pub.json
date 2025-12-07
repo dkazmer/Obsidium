@@ -1,0 +1,10 @@
+{
+	"extends": "./tsconfig.json",
+	"files": ["src/observers.ts"],
+	"compilerOptions": {
+		// "outDir": "./dist",
+		"declaration": true,
+		"declarationDir": "./dist",
+		"emitDeclarationOnly": true
+	}
+}

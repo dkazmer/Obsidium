@@ -1,19 +1,31 @@
 {
-	"name": "obsidian",
+	"name": "obsidium",
 	"version": "1.0.0",
 	"description": "A convenient wrapper for all the JS observers.",
 	"main": "main.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "esbuild src/main.ts --bundle --sourcemap --watch --outfile=main.js --servedir=/"
+		"start": "esbuild src/main.ts --bundle --sourcemap --watch --outfile=main.js --servedir=/",
+		"build": "rm -rf dist && tsc -p tsconfig.pub.json && esbuild src/observers.ts --bundle --outfile=dist/index.js --format=esm --target=es2020 --minify"
 	},
-	"keywords": [],
-	"author": "Daniel B. Kazmer",
+	"keywords": [
+		"javascript",
+		"typescript",
+		"observer",
+		"IntersectionObserver",
+		"MutationObserver",
+		"ResizeObserver"
+	],
+	"author": "Daniel B. Kazmer <dkazmer@live.ca> (https://webshifted.com)",
 	"license": "GPL-3.0-only",
 	"type": "module",
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.8",
 		"esbuild": "^0.27.1",
 		"typescript": "^5.9.3"
-	}
+	},
+	"types": "dist/observers.d.ts",
+	"files": [
+		"dist"
+	]
 }

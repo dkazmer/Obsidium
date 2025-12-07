@@ -4,7 +4,7 @@ abstract class Observer<
 > {
 	#isSuspended = true;
 
-	protected notify: Notify = {};
+	protected notify: { [K in OnKeys]?: Notify[K] } = {};
 	protected observer!: T;
 	public type = '';
 
@@ -13,15 +13,15 @@ abstract class Observer<
 		private settings?: MutationObserverInit
 	) {
 		resolve('Safe to invoke sub class methods').then(() => {
-			this.type = this.observer.constructor.name; // as typeof this.type;
-			// this.restart();
+			this.type = this.observer.constructor.name;
+			// this.resume();
 		});
 	}
 
 	/**
-	 * restart
+	 * resume
 	 */
-	public restart() {
+	public resume() {
 		if (this.#isSuspended === false) {
 			console.warn('Observer is already running...');
 			return;
@@ -69,24 +69,56 @@ abstract class Observer<
 
 /**
  * Intuitive wrapper class for the JS observers:
- * - {@linkcode Obsidian.mutation|mutation} _MutationObserver_
- * - {@linkcode Obsidian.resize|resize} _ResizeObserver_
- * - {@linkcode Obsidian.intersection|intersection} _IntersectionObserver_
+ * - {@linkcode Obsidium.mutation|mutation} _MutationObserver_
+ * - {@linkcode Obsidium.resize|resize} _ResizeObserver_
+ * - {@linkcode Obsidium.intersection|intersection} _IntersectionObserver_
  * @summary Created to encourage greater use of these high-value JS utilities,
  * as they're vastly underused and unknown, largely for their complex implementation.
  * @author Daniel B. Kazmer
  * @version 1.0.0
  */
-export namespace Obsidian {
+export namespace Obsidium {
 	/**
-	 * Intuitive wrapper class for `ResizeObserver`. Controls:
+	 * Intuitive wrapper class for `IntersectionObserver`. Controls:
 	 * - {@linkcode Observer.suspend|.suspend()}
-	 * - {@linkcode Observer.restart|.restart()}
+	 * - {@linkcode Observer.resume|.resume()}
 	 * - {@linkcode Observer.kill|.kill()}
 	 * @author Daniel B. Kazmer
 	 * @version 1.0.0
 	 * @example
-	 * const obsidR = new Obsidian.resize(element)
+	 * const obsidI = new Obsidium.intersection(element)
+	 *    .on('intersect', myCallback);
+	 */
+	export class intersection extends Observer<IntersectionObserver, Extract<keyof Notify, 'intersect'>> {
+		constructor(target: Element, settings?: IntersectionObserverInit) {
+			super(target);
+
+			this.observer = new IntersectionObserver(
+				entries => {
+					for (const entry of entries) {
+						this.notify.intersect?.(entry);
+					}
+				},
+				{
+					root: null,
+					rootMargin: '0px',
+					...settings
+				}
+			);
+
+			this.resume();
+		}
+	}
+
+	/**
+	 * Intuitive wrapper class for `ResizeObserver`. Controls:
+	 * - {@linkcode Observer.suspend|.suspend()}
+	 * - {@linkcode Observer.resume|.resume()}
+	 * - {@linkcode Observer.kill|.kill()}
+	 * @author Daniel B. Kazmer
+	 * @version 1.0.0
+	 * @example
+	 * const obsidR = new Obsidium.resize(element)
 	 *    .on('resize', myCallback);
 	 */
 	export class resize extends Observer<ResizeObserver, Extract<keyof Notify, 'resize'>> {
@@ -95,30 +127,23 @@ export namespace Obsidian {
 
 			this.observer = new ResizeObserver(entries => {
 				for (const entry of entries) {
-					if (entry.contentBoxSize) {
-						// const contentBoxSize = entry.contentBoxSize[0];
-						console.log('>> contentBoxSize', entry.contentBoxSize);
-					} else {
-						console.log('>> borderBoxSize', entry.borderBoxSize);
-					}
-					console.log('>> resized?', entry);
 					this.notify.resize?.(entry);
 				}
 			});
 
-			this.restart();
+			this.resume();
 		}
 	}
 
 	/**
 	 * Intuitive wrapper class for `MutationObserver`. Controls:
 	 * - {@linkcode Observer.suspend|.suspend()}
-	 * - {@linkcode Observer.restart|.restart()}
+	 * - {@linkcode Observer.resume|.resume()}
 	 * - {@linkcode Observer.kill|.kill()}
 	 * @author Daniel B. Kazmer
 	 * @version 1.0.0
 	 * @example
-	 * const obsidM = new Obsidian.mutation(scopeElement)
+	 * const obsidM = new Obsidium.mutation(scopeElement)
 	 *    .on('added', myCallbackAdd)
 	 *    .on('removed', myCallbackRmv);
 	 */
@@ -145,7 +170,7 @@ export namespace Obsidian {
 				}
 			});
 
-			this.restart();
+			this.resume();
 		}
 	}
 }
@@ -164,7 +189,8 @@ interface Notify<T = void> {
 	added?: Fn<T, NodeList>;
 	removed?: Fn<T, NodeList>;
 	resize?: Fn<T, ResizeObserverEntry>;
+	intersect?: Fn<T, IntersectionObserverEntry>;
 }
 
 type Fn<T = void, U = any> = (...args: U[]) => T;
-export type Obsidian = InstanceType<(typeof Obsidian)['mutation' | 'resize']>;
+export type Obsidium = InstanceType<(typeof Obsidium)['mutation' | 'resize' | 'intersection']>;
