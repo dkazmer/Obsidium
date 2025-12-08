@@ -1,0 +1,19 @@
+{
+	"name": "obsidium",
+	"version": "1.0.0",
+	"description": "A declarative wrapper for all the JS observers.",
+	"main": "index.js",
+	"keywords": [
+		"javascript",
+		"typescript",
+		"observer",
+		"IntersectionObserver",
+		"MutationObserver",
+		"ResizeObserver"
+	],
+	"author": "Daniel B. Kazmer <dkazmer@live.ca> (https://webshifted.com)",
+	"license": "GPL-3.0-only",
+	"type": "module",
+	"types": "observers.d.ts",
+	"homepage": "https://github.com/dkazmer/Obsidium"
+}

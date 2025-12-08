@@ -1,7 +1,7 @@
 {
 	"name": "obsidium",
 	"version": "1.0.0",
-	"description": "A convenient & intuitive wrapper for all the JS observers.",
+	"description": "A declarative wrapper for all the JS observers.",
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",

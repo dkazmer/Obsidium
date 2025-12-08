@@ -212,12 +212,12 @@ function resolve<T = string>(msg: T) {
 // types
 
 interface Notify<T = void> {
-	attr?: Fn<T, { attribute: string | null; target: Node }>;
-	add?: Fn<T, NodeList>;
-	remove?: Fn<T, NodeList>;
-	mutate?: (added: NodeList, removed: NodeList) => T;
-	resize?: Fn<T, ResizeObserverEntry>;
-	intersect?: Fn<T, IntersectionObserverEntry>;
+	attr: Fn<T, { attribute: string | null; target: Node }>;
+	add: Fn<T, NodeList>;
+	remove: Fn<T, NodeList>;
+	mutate: (added: NodeList, removed: NodeList) => T;
+	resize: Fn<T, ResizeObserverEntry>;
+	intersect: Fn<T, IntersectionObserverEntry>;
 }
 
 type Fn<T = void, U = any> = (...args: U[]) => T;
