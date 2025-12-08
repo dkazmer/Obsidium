@@ -1,5 +1,5 @@
 # Obsidium
-Intuitive wrapper class for the JS observers:
+Declarative wrapper class for the JS observers:
 
 ### Rationale
 
@@ -34,6 +34,7 @@ Method | Desc.
 ------ | -----
 `suspend` | stop observing; reserves the right to resume
 `resume` | resume a suspended observer
+`toggle` | suspend or resume depending on observer state
 `dump` | end the process entirely and destroy the instance
 
 The generic default settings are set for each observer, which can be overridden via the second, fully typed, parameter of the constructor, specific to the chosen observer type. **Caveat:** `resize` has no "options" param as it's not complex enough to need one.

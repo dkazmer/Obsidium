@@ -2,11 +2,12 @@
 	"name": "obsidium",
 	"version": "1.0.0",
 	"description": "A convenient & intuitive wrapper for all the JS observers.",
-	"main": "main.js",
+	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"start": "esbuild src/main.ts --bundle --sourcemap --watch --outfile=main.js --servedir=/",
-		"build": "rm -rf dist && tsc -p tsconfig.pub.json && esbuild src/observers.ts --bundle --outfile=dist/index.js --format=esm --target=es2020 --minify"
+		"build": "tsc -p tsconfig.pub.json && esbuild src/observers.ts --bundle --outfile=dist/index.js --format=esm --target=es2020 --minify",
+		"build:rm": "rm -rf dist && npm run build"
 	},
 	"keywords": [
 		"javascript",

@@ -1,53 +1,49 @@
 /**
- * Intuitive wrapper class for the JS observers:
+ * Declarative wrapper functions for the JS observers:
  * - {@linkcode Obsidium.mutation|mutation} _MutationObserver_
  * - {@linkcode Obsidium.resize|resize} _ResizeObserver_
  * - {@linkcode Obsidium.intersection|intersection} _IntersectionObserver_
  * @summary Created to encourage greater use of these high-value JS utilities,
- * as they're vastly underused and unknown, largely for their complex implementation.
+ * as they're vastly underused and unknown, largely due to their complex implementation strategy.
  * @author Daniel B. Kazmer
  * @version 1.0.0
+ * @see {@link https://github.com/dkazmer/Obsidium|GitHub}
  */
 export namespace Obsidium {
 	/**
-	 * Intuitive wrapper class for `IntersectionObserver`. Controls:
-	 * - {@linkcode Observer.suspend|.suspend()}
-	 * - {@linkcode Observer.resume|.resume()}
-	 * - {@linkcode Observer.kill|.kill()}
-	 * @author Daniel B. Kazmer
-	 * @version 1.0.0
+	 * Declarative wrapper for `IntersectionObserver`. Control methods:
+	 * - {@linkcode Observer.suspend|suspend}
+	 * - {@linkcode Observer.resume|resume}
+	 * - {@linkcode Observer.toggle|toggle}
+	 * - {@linkcode Observer.dump|dump}
 	 * @example
-	 * const obsidI = Obsidium.intersection(element)
-	 *   .on('intersect', myCallback);
+	 * Obsidium.intersection(element).on('intersect', myCallback);
 	 */
 	export function intersection(target: Element, settings?: IntersectionObserverInit) {
 		return new Intersection(target, settings);
 	}
 
 	/**
-	 * Intuitive wrapper class for `ResizeObserver`. Controls:
-	 * - {@linkcode Observer.suspend|.suspend()}
-	 * - {@linkcode Observer.resume|.resume()}
-	 * - {@linkcode Observer.kill|.kill()}
-	 * @author Daniel B. Kazmer
-	 * @version 1.0.0
+	 * Declarative wrapper for `ResizeObserver`. Control methods:
+	 * - {@linkcode Observer.suspend|suspend}
+	 * - {@linkcode Observer.resume|resume}
+	 * - {@linkcode Observer.toggle|toggle}
+	 * - {@linkcode Observer.dump|dump}
 	 * @example
-	 * const obsidR = Obsidium.resize(element)
-	 *   .on('resize', myCallback);
+	 * Obsidium.resize(element).on('resize', myCallback);
 	 */
 	export function resize(target: Element) {
 		return new Resize(target);
 	}
 
 	/**
-	 * Intuitive wrapper class for `MutationObserver`. Controls:
-	 * - {@linkcode Observer.suspend|.suspend()}
-	 * - {@linkcode Observer.resume|.resume()}
-	 * - {@linkcode Observer.kill|.kill()}
-	 * @author Daniel B. Kazmer
-	 * @version 1.0.0
+	 * Declarative wrapper for `MutationObserver`. Control methods:
+	 * - {@linkcode Observer.suspend|suspend}
+	 * - {@linkcode Observer.resume|resume}
+	 * - {@linkcode Observer.toggle|toggle}
+	 * - {@linkcode Observer.dump|dump}
 	 * @example
-	 * const obsidM = Obsidium.mutation(scopeElement)
+	 * Obsidium.mutation(scopeElement)
 	 *   .on('add', myCallbackAdd)
 	 *   .on('remove', myCallbackRmv);
 	 */
@@ -55,6 +51,9 @@ export namespace Obsidium {
 		return new Mutation(target, settings);
 	}
 }
+
+// -----------------------------------------------------------------------------------------------------
+// classes
 
 abstract class Observer<
 	T extends MutationObserver | ResizeObserver | IntersectionObserver,
@@ -77,7 +76,7 @@ abstract class Observer<
 	}
 
 	/**
-	 * resume
+	 * `resume` (explicit)
 	 * @summary resume a suspended observer
 	 */
 	public resume() {
@@ -94,8 +93,8 @@ abstract class Observer<
 	}
 
 	/**
-	 * suspend
-	 * @summary stop observing; reserves the right to resume
+	 * `suspend` (explicit)
+	 * @summary suspend observation; reserves the right to resume
 	 */
 	public suspend() {
 		if (this.#isSuspended === true) {
@@ -108,7 +107,15 @@ abstract class Observer<
 	}
 
 	/**
-	 * dump
+	 * `toggle` (implicit)
+	 * @summary suspend or resume depending on observer state
+	 */
+	public toggle() {
+		this.#isSuspended ? this.resume() : this.suspend();
+	}
+
+	/**
+	 * `dump`
 	 * @summary end the process entirely and destroy the instance
 	 */
 	public dump() {
@@ -120,10 +127,11 @@ abstract class Observer<
 	}
 
 	/**
-	 * on
+	 * `on`
+	 * @summary subscription method, with accurate intellisense; examples in parent class/fn
 	 */
-	public on(name: OnKeys, fn: Fn) {
-		this.notify[name] = (e: any) => fn.call(this, e);
+	public on<K extends OnKeys>(name: K, fn: Exclude<Notify[K], undefined>) {
+		this.notify[name] = (...e: any[]) => fn.call(this, ...e);
 		return this;
 	}
 }
@@ -196,9 +204,12 @@ class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'resize' | 
  * Seems to take precedence over a time-out.
  * @returns a promise
  */
-export function resolve<T = string>(msg: T) {
+function resolve<T = string>(msg: T) {
 	return new Promise<T>(res => res(msg));
 }
+
+// -----------------------------------------------------------------------------------------------------
+// types
 
 interface Notify<T = void> {
 	attr?: Fn<T, { attribute: string | null; target: Node }>;
@@ -214,3 +225,8 @@ type FnNames = 'mutation' | 'resize' | 'intersection';
 export type Obsidium = ReturnType<(typeof Obsidium)[FnNames]>;
 // export type Obsidium<T extends FnNames = FnNames> = ReturnType<(typeof Obsidium)[T]>;
 // export type Obsidium = InstanceType<(typeof Obsidium)['mutation' | 'resize' | 'intersection']>;
+/* type GetParam<Type> = Type extends Fn<any, infer X>
+	? X
+	: Type extends (p: infer Y) => any
+		? Y
+		: never; */
