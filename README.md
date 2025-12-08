@@ -7,9 +7,9 @@ Created to encourage greater use of these high-value JS utilities, as they're va
 
 I found that every time I wanted to use one or more of them, I'd have to go out of my way to research and refresh my understanding thereof. Moreover, there are subtle differences in their implementation between them that's just annoying.
 
-I really just want to set it and forget it. `Obsidium` allows you to do just that...in a strongly typed, consolidated way. The idea is to instantiate the desired type of observer, then subscribe to it via `on`.
+I really just want to set it and forget it. `Obsidium` allows you to do just that…in a strongly typed, consolidated way. The idea is to instantiate the desired type of observer, then subscribe to it via `.on(…)`.
 
-Obs. name | wraps...
+Obs. name | wraps…
 --------- | --------
 `mutation` | `MutationObserver`
 `resize` | `ResizeObserver`
@@ -30,7 +30,7 @@ Obsidium.intersection(element).on('intersect', myCallback);
 ```
 `on` method is fully intellisensed. Meaning, the available options will be made known.
 
-### Methods
+### Members
 
 Control your instance with the following methods:
 
