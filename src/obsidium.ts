@@ -61,8 +61,18 @@ abstract class Observer<
 > {
 	#isSuspended = true;
 
-	protected notify: { [K in OnKeys]?: Notify[K] } = {};
 	protected observer!: T;
+	protected notify: { [K in OnKeys]?: Notify[K] } = {};
+	protected notifyAll?(
+		arg: T extends IntersectionObserver
+			? IntersectionObserverEntry
+			: T extends ResizeObserver
+				? ResizeObserverEntry
+				: T extends MutationObserver
+					? MutationRecord[]
+					: never
+	): void;
+
 	public type = '';
 
 	constructor(
@@ -81,7 +91,7 @@ abstract class Observer<
 	 */
 	public resume() {
 		if (this.#isSuspended === false) {
-			console.warn('Observer is already running...');
+			console.warn('Obsidium: observer is already running...');
 			return;
 		}
 
@@ -98,7 +108,7 @@ abstract class Observer<
 	 */
 	public suspend() {
 		if (this.#isSuspended === true) {
-			console.warn('Observer is already suspended...');
+			console.warn('Obsidium: observer is already suspended...');
 			return;
 		}
 
@@ -130,10 +140,20 @@ abstract class Observer<
 	 * `on`
 	 * @summary subscription method, with accurate intellisense; examples in parent class/fn
 	 */
-	public on<K extends OnKeys>(name: K, fn: Exclude<Notify[K], undefined>) {
+	public on<K extends OnKeys>(name: K, fn: Exclude<Notify[K], undefined>): Observer<T, Exclude<OnKeys, K>> {
+		if (this.notify[name]) console.warn(`Obsidium: a subscription already exists for "${name}" for this instance.`);
 		// @ts-expect-error: 2556
-		this.notify[name] = (...e: any[]) => fn.call(this, ...e);
+		else this.notify[name] = (...e: any[]) => fn.call(this, ...e);
 		return this;
+	}
+
+	/**
+	 * `all`
+	 * @summary subscription method; like {@linkcode on} but non-discriminatory; pass only callback
+	 */
+	public all(fn: Exclude<typeof this.notifyAll, undefined>): void {
+		if (this.notifyAll) console.warn('Obsidium: `all` notifier has already been created for this instance.');
+		else this.notifyAll = e => fn.call(this, e);
 	}
 }
 
@@ -145,6 +165,7 @@ class Intersection extends Observer<IntersectionObserver, Extract<keyof Notify, 
 			entries => {
 				for (const entry of entries) {
 					this.notify.intersect?.(entry);
+					this.notifyAll?.(entry);
 				}
 			},
 			{
@@ -165,6 +186,7 @@ class Resize extends Observer<ResizeObserver, Extract<keyof Notify, 'resize'>> {
 		this.observer = new ResizeObserver(entries => {
 			for (const entry of entries) {
 				this.notify.resize?.(entry);
+				this.notifyAll?.(entry);
 			}
 		});
 
@@ -176,8 +198,8 @@ class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'resize' | 
 	constructor(target: Node, settings?: MutationObserverInit) {
 		super(target, settings);
 
-		this.observer = new MutationObserver((list, obs) => {
-			for (const mutation of list) {
+		this.observer = new MutationObserver((records, obs) => {
+			for (const mutation of records) {
 				switch (mutation.type) {
 					// biome-ignore format: compact
 					case 'childList': {
@@ -194,6 +216,8 @@ class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'resize' | 
 					}
 				}
 			}
+
+			this.notifyAll?.(records);
 		});
 
 		this.resume();
@@ -221,13 +245,15 @@ interface Notify<T = void> {
 	intersect: (entry: IntersectionObserverEntry) => T;
 }
 
-type Fn<T = void, U = any> = (...args: U[]) => T;
-type FnNames = 'mutation' | 'resize' | 'intersection';
-export type Obsidium = ReturnType<(typeof Obsidium)[FnNames]>;
-// export type Obsidium<T extends FnNames = FnNames> = ReturnType<(typeof Obsidium)[T]>;
-// export type Obsidium = InstanceType<(typeof Obsidium)['mutation' | 'resize' | 'intersection']>;
-/* type GetParam<Type> = Type extends Fn<any, infer X>
-	? X
-	: Type extends (p: infer Y) => any
-		? Y
-		: never; */
+export type Obsidium = ReturnType<(typeof Obsidium)[keyof typeof Obsidium]>;
+
+/**
+ * v110
+ * precise types in Notify interface
+ * Obsidium namespace is indexed less manually: `[keyof typeof Obsidium]`
+ * `.on()` return type excludes notifiers already used
+ * `.on()` check whether a notifier already exists
+ * new! `.all()` subscription method
+ */
+
+// register "obsidium.dev"
