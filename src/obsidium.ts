@@ -255,6 +255,7 @@ export type Obsidium = ReturnType<(typeof Obsidium)[keyof typeof Obsidium]>;
  * `.on()` check whether a notifier already exists
  * new! `.subscribe()` subscription method
  * export each wrapper class individually
+ * crossed 80% unit test coverage!
  */
 
 // register "obsidium.dev"

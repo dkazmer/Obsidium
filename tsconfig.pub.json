@@ -3,6 +3,7 @@
 	"files": ["src/obsidium.ts"],
 	"compilerOptions": {
 		// "outDir": "./dist",
+		"rootDir": "./src",
 		"declaration": true,
 		"declarationDir": "./dist",
 		"emitDeclarationOnly": true
