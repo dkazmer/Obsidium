@@ -63,7 +63,7 @@ abstract class Observer<
 
 	protected observer!: T;
 	protected notify: { [K in OnKeys]?: Notify[K] } = {};
-	protected notifyAll?(
+	protected notifySub?(
 		arg: T extends IntersectionObserver
 			? IntersectionObserverEntry
 			: T extends ResizeObserver
@@ -137,27 +137,27 @@ abstract class Observer<
 	}
 
 	/**
-	 * `on`
-	 * @summary subscription method, with accurate intellisense; examples in parent class/fn
+	 * `on` (specific)
+	 * @summary subscription method, with accurate IntelliSense; examples in parent class/fn
 	 */
 	public on<K extends OnKeys>(name: K, fn: Exclude<Notify[K], undefined>): Observer<T, Exclude<OnKeys, K>> {
-		if (this.notify[name]) console.warn(`Obsidium: a subscription already exists for "${name}" for this instance.`);
+		if (this.notify[name]) console.warn(`Obsidium: a subscription already exists for "${name}" on this instance.`);
 		// @ts-expect-error: 2556
 		else this.notify[name] = (...e: any[]) => fn.call(this, ...e);
 		return this;
 	}
 
 	/**
-	 * `all`
+	 * `subscribe` (generic)
 	 * @summary subscription method; like {@linkcode on} but non-discriminatory; pass only callback
 	 */
-	public all(fn: Exclude<typeof this.notifyAll, undefined>): void {
-		if (this.notifyAll) console.warn('Obsidium: `all` notifier has already been created for this instance.');
-		else this.notifyAll = e => fn.call(this, e);
+	public subscribe(fn: Exclude<typeof this.notifySub, undefined>): void {
+		if (this.notifySub) console.warn('Obsidium: a "subscribe" notifier has already been created for this instance.');
+		else this.notifySub = e => fn.call(this, e);
 	}
 }
 
-class Intersection extends Observer<IntersectionObserver, Extract<keyof Notify, 'intersect'>> {
+export class Intersection extends Observer<IntersectionObserver, Extract<keyof Notify, 'intersect'>> {
 	constructor(target: Element, settings?: IntersectionObserverInit) {
 		super(target);
 
@@ -165,7 +165,7 @@ class Intersection extends Observer<IntersectionObserver, Extract<keyof Notify, 
 			entries => {
 				for (const entry of entries) {
 					this.notify.intersect?.(entry);
-					this.notifyAll?.(entry);
+					this.notifySub?.(entry);
 				}
 			},
 			{
@@ -179,14 +179,14 @@ class Intersection extends Observer<IntersectionObserver, Extract<keyof Notify, 
 	}
 }
 
-class Resize extends Observer<ResizeObserver, Extract<keyof Notify, 'resize'>> {
+export class Resize extends Observer<ResizeObserver, Extract<keyof Notify, 'resize'>> {
 	constructor(target: Element) {
 		super(target);
 
 		this.observer = new ResizeObserver(entries => {
 			for (const entry of entries) {
 				this.notify.resize?.(entry);
-				this.notifyAll?.(entry);
+				this.notifySub?.(entry);
 			}
 		});
 
@@ -194,7 +194,7 @@ class Resize extends Observer<ResizeObserver, Extract<keyof Notify, 'resize'>> {
 	}
 }
 
-class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'resize' | 'intersect'>> {
+export class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'resize' | 'intersect'>> {
 	constructor(target: Node, settings?: MutationObserverInit) {
 		super(target, settings);
 
@@ -217,7 +217,7 @@ class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'resize' | 
 				}
 			}
 
-			this.notifyAll?.(records);
+			this.notifySub?.(records);
 		});
 
 		this.resume();
@@ -253,7 +253,8 @@ export type Obsidium = ReturnType<(typeof Obsidium)[keyof typeof Obsidium]>;
  * Obsidium namespace is indexed less manually: `[keyof typeof Obsidium]`
  * `.on()` return type excludes notifiers already used
  * `.on()` check whether a notifier already exists
- * new! `.all()` subscription method
+ * new! `.subscribe()` subscription method
+ * export each wrapper class individually
  */
 
 // register "obsidium.dev"

@@ -28,7 +28,7 @@ Obsidium.mutation(scopeElement)
 Obsidium.resize(element).on('resize', myCallback);
 Obsidium.intersection(element).on('intersect', myCallback);
 ```
-`on` method is fully intellisensed. Meaning, the available options will be made known.
+`on` method is fully IntelliSensed. Meaning, the available options will be made known.
 
 ### Members
 

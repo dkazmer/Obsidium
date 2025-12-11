@@ -7,7 +7,8 @@
 		"test": "vitest",
 		"start": "esbuild src/main.ts --bundle --sourcemap --watch --outfile=main.js --servedir=/",
 		"build": "tsc -p tsconfig.pub.json && esbuild src/observers.ts --bundle --outfile=dist/index.js --format=esm --target=es2020 --minify",
-		"build:rm": "rm -rf dist && npm run build"
+		"build:rm": "rm -rf dist && npm run build",
+		"coverage": "vitest --coverage"
 	},
 	"keywords": [
 		"javascript",

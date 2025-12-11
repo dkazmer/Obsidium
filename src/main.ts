@@ -20,4 +20,15 @@ declare global {
 	var io: Obsidium;
 }
 
-// Obsidium.mutation(document.body).all()
+window.mo.on('add', entry => {
+	console.log('>> entry', entry);
+});
+
+window.ro.subscribe(entry => {
+	console.log('>> entry', entry);
+});
+
+/* window.ro.subscribe(entry => {
+	console.log('>>> entry', entry);
+});
+ */
