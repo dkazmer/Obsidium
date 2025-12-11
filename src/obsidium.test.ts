@@ -1,8 +1,10 @@
 import type { Mock } from 'vitest/dist/index';
 import { Obsidium } from './obsidium';
 
+type MoAttr = { attribute: string | null; target: Node };
+
 const callbacks = {
-	mo(nodes: NodeList) {
+	mo<T extends NodeList | MoAttr>(arg: T) {
 		return 'mutated!';
 	},
 	ro(entry: ResizeObserverEntry) {
@@ -17,6 +19,14 @@ describe('Mutation Observer', () => {
 	const elem = mockDOM();
 	const mo = Obsidium.mutation(elem);
 
+	const { promise: p1, resolve: res1 } = Promise.withResolvers<NodeList>();
+	const { promise: p2, resolve: res2 } = Promise.withResolvers<MoAttr>();
+
+	Promise.allSettled([p1, p2]).finally(() => {
+		setTimeout(() => mo.dump(), 0);
+		document.body.removeChild(elem);
+	});
+
 	it('should create', () => {
 		expect<Obsidium>(mo).toBeTruthy();
 	});
@@ -24,23 +34,53 @@ describe('Mutation Observer', () => {
 	it('should indicate a mutation: add', async () => {
 		const spy = vi.spyOn(callbacks, 'mo');
 
-		return new Promise<NodeList>(res => {
-			mo.on('add', added => {
-				callbacks.mo(added);
-				res(added);
-				setTimeout(() => mo.dump(), 0);
-				// mo.suspend();
-				document.body.removeChild(elem);
-			});
-
-			mockDOM(elem);
-		}).then(nodes => {
+		p1.then(nodes => {
 			expect<Mock>(spy).toHaveBeenCalledExactlyOnceWith<NodeList[]>(nodes);
 			expect<Node>(nodes[0]!).toBe<Node>(elem.childNodes[0]!);
+			spy.mockClear();
 		});
-		/* .catch(() => {
-				expect<Mock>(spy).toHaveBeenCalledTimes(0);
-			}); */
+
+		mo.on('add', added => {
+			callbacks.mo(added);
+			res1(added);
+		});
+
+		mockDOM(elem);
+		return p1;
+	});
+
+	it('should indicate a mutation: attr', async () => {
+		const spy = vi.spyOn(callbacks, 'mo');
+
+		p2.then(obj => {
+			expect<Mock>(spy).toHaveBeenCalledExactlyOnceWith<MoAttr[]>(obj);
+			expect<Node>(obj.target).toBe<Node>(elem);
+			spy.mockClear();
+		});
+
+		mo.on('attr', obj => {
+			callbacks.mo(obj);
+			res2(obj);
+		});
+
+		elem.id = 'test';
+		return p2;
+	});
+
+	const spy = vi.spyOn(console, 'warn').mockImplementation(vi.fn());
+
+	it('should warn that specific notifier already exists', () => {
+		mo.on('mutate', vi.fn());
+		mo.on('mutate', vi.fn());
+		expect<Mock>(spy).toHaveBeenCalledOnce();
+		spy.mockClear();
+	});
+
+	it('should warn that generic notifier already exists', () => {
+		mo.subscribe(vi.fn());
+		mo.subscribe(vi.fn());
+		expect<Mock>(spy).toHaveBeenCalledOnce();
+		spy.mockClear();
 	});
 });
 
@@ -68,6 +108,18 @@ describe('Resize Observer', () => {
 		}).then(entry => {
 			expect<Mock>(spy).toHaveBeenCalledExactlyOnceWith<ResizeObserverEntry[]>(entry);
 		});
+	});
+
+	it('should suspend instance', () => {
+		const spy = vi.spyOn(ro, 'suspend');
+		ro.suspend();
+		expect<Mock>(spy).toHaveBeenCalledOnce();
+	});
+
+	it('should toggle instance state', () => {
+		const spy = vi.spyOn(ro, 'toggle');
+		ro.toggle();
+		expect<Mock>(spy).toHaveBeenCalledOnce();
 	});
 });
 
