@@ -48,3 +48,19 @@ The generic default settings are set for each observer, which can be overridden 
 ```ts
 const myObs: Obsidium = Obsidium[obsName](elementObsd, obsOptions);
 ```
+
+### Advanced
+
+<!-- As of v1.1 … -->
+- use the alternatively available `subscribe` method
+- import only the wrapper class you need
+
+<!-- As of v1.1, use the `subscribe` method.
+```ts
+Obsidium.intersection(...).subscribe(entry => void 0));
+```
+
+Also as of v1.1, import only the wrapper class you need.
+```ts
+import { Resize } from 'obsidium';
+``` -->

@@ -17,7 +17,7 @@ window.io = Obsidium.intersection(document.body).on('intersect', ({ isIntersecti
 declare global {
 	var mo: Obsidium;
 	var ro: Obsidium;
-	var io: Obsidium;
+	var io: Obsidium<'intersection'>;
 }
 
 window.mo.on('add', entry => {

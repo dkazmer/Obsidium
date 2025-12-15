@@ -141,9 +141,11 @@ abstract class Observer<
 	 * @summary subscription method, with accurate IntelliSense; examples in parent class/fn
 	 */
 	public on<K extends OnKeys>(name: K, fn: Exclude<Notify[K], undefined>): Observer<T, Exclude<OnKeys, K>> {
-		if (this.notify[name]) console.warn(`Obsidium: a subscription already exists for "${name}" on this instance.`);
-		// @ts-expect-error: 2556
-		else this.notify[name] = (...e: any[]) => fn.call(this, ...e);
+		this.notify[name]
+			? console.warn(`Obsidium: a subscription already exists for <${name}> on this instance.`)
+			: // biome-ignore lint/suspicious/noExplicitAny: allow `any` for this particular line
+				(this.notify[name] = (...e: any[]) => fn.call(this, ...(e as [any, any])));
+
 		return this;
 	}
 
@@ -152,8 +154,9 @@ abstract class Observer<
 	 * @summary subscription method; like {@linkcode on} but non-discriminatory; pass only callback
 	 */
 	public subscribe(fn: Exclude<typeof this.notifySub, undefined>): void {
-		if (this.notifySub) console.warn('Obsidium: a "subscribe" notifier has already been created for this instance.');
-		else this.notifySub = e => fn.call(this, e);
+		this.notifySub
+			? console.warn('Obsidium: a <subscribe> notifier has already been created for this instance.')
+			: (this.notifySub = e => fn.call(this, e));
 	}
 }
 
@@ -162,7 +165,7 @@ export class Intersection extends Observer<IntersectionObserver, Extract<keyof N
 		super(target);
 
 		this.observer = new IntersectionObserver(
-			entries => {
+			(entries, _obs) => {
 				for (const entry of entries) {
 					this.notify.intersect?.(entry);
 					this.notifySub?.(entry);
@@ -183,7 +186,7 @@ export class Resize extends Observer<ResizeObserver, Extract<keyof Notify, 'resi
 	constructor(target: Element) {
 		super(target);
 
-		this.observer = new ResizeObserver(entries => {
+		this.observer = new ResizeObserver((entries, _obs) => {
 			for (const entry of entries) {
 				this.notify.resize?.(entry);
 				this.notifySub?.(entry);
@@ -198,7 +201,7 @@ export class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'res
 	constructor(target: Node, settings?: MutationObserverInit) {
 		super(target, settings);
 
-		this.observer = new MutationObserver((records, obs) => {
+		this.observer = new MutationObserver((records, _obs) => {
 			for (const mutation of records) {
 				switch (mutation.type) {
 					// biome-ignore format: compact
@@ -245,16 +248,4 @@ interface Notify<T = void> {
 	intersect: (entry: IntersectionObserverEntry) => T;
 }
 
-export type Obsidium = ReturnType<(typeof Obsidium)[keyof typeof Obsidium]>;
-
-/**
- * v110
- * precise types in Notify interface
- * Obsidium namespace is indexed less manually: `[keyof typeof Obsidium]`
- * `.on()` return type excludes notifiers already used
- * `.on()` check whether a notifier already exists
- * new! `.subscribe()` subscription method
- * export each wrapper class individually
- */
-
-// register "obsidium.dev"
+export type Obsidium<T extends keyof typeof Obsidium = keyof typeof Obsidium> = ReturnType<(typeof Obsidium)[T]>;

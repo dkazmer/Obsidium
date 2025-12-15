@@ -1,16 +1,14 @@
 import type { Mock } from 'vitest/dist/index';
 import { Obsidium } from './obsidium';
 
-type MoAttr = { attribute: string | null; target: Node };
-
-const callbacks = {
-	mo<T extends NodeList | MoAttr>(arg: T) {
+const mockMethods = {
+	mo<T extends NodeList | MoAttr>(_arg: T) {
 		return 'mutated!';
 	},
-	ro(entry: ResizeObserverEntry) {
+	ro(_entry: ResizeObserverEntry) {
 		return 'resized!';
 	},
-	io(entry: IntersectionObserverEntry) {
+	io(_entry: IntersectionObserverEntry) {
 		return 'intersected!';
 	}
 };
@@ -32,7 +30,7 @@ describe('Mutation Observer', () => {
 	});
 
 	it('should indicate a mutation: add', async () => {
-		const spy = vi.spyOn(callbacks, 'mo');
+		const spy = vi.spyOn(mockMethods, 'mo');
 
 		p1.then(nodes => {
 			expect<Mock>(spy).toHaveBeenCalledExactlyOnceWith<NodeList[]>(nodes);
@@ -41,7 +39,7 @@ describe('Mutation Observer', () => {
 		});
 
 		mo.on('add', added => {
-			callbacks.mo(added);
+			mockMethods.mo(added);
 			res1(added);
 		});
 
@@ -50,7 +48,7 @@ describe('Mutation Observer', () => {
 	});
 
 	it('should indicate a mutation: attr', async () => {
-		const spy = vi.spyOn(callbacks, 'mo');
+		const spy = vi.spyOn(mockMethods, 'mo');
 
 		p2.then(obj => {
 			expect<Mock>(spy).toHaveBeenCalledExactlyOnceWith<MoAttr[]>(obj);
@@ -59,7 +57,7 @@ describe('Mutation Observer', () => {
 		});
 
 		mo.on('attr', obj => {
-			callbacks.mo(obj);
+			mockMethods.mo(obj);
 			res2(obj);
 		});
 
@@ -93,11 +91,11 @@ describe('Resize Observer', () => {
 	});
 
 	it.skip('should indicate a resize', async () => {
-		const spy = vi.spyOn(callbacks, 'ro');
+		const spy = vi.spyOn(mockMethods, 'ro');
 
 		return new Promise<ResizeObserverEntry>(res => {
 			ro.on('resize', entry => {
-				callbacks.ro(entry);
+				mockMethods.ro(entry);
 				res(entry);
 				setTimeout(() => ro.dump(), 0);
 				// ro.suspend();
@@ -132,11 +130,11 @@ describe('Intersection Observer', () => {
 	});
 
 	it.skip('should indicate an intersection', async () => {
-		const spy = vi.spyOn(callbacks, 'io');
+		const spy = vi.spyOn(mockMethods, 'io');
 
 		return new Promise<IntersectionObserverEntry>(res => {
 			io.on('intersect', entry => {
-				callbacks.io(entry);
+				mockMethods.io(entry);
 				res(entry);
 				setTimeout(() => io.dump(), 0);
 				// io.suspend();
@@ -155,3 +153,5 @@ function mockDOM(container?: HTMLElement) {
 	container ? container.append(div) : document.body.append(div);
 	return div;
 }
+
+type MoAttr = { attribute: string | null; target: Node };
