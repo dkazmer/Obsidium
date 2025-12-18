@@ -6,7 +6,7 @@
  * @summary Created to encourage greater use of these high-value JS utilities,
  * as they're vastly underused and unknown, largely due to their complex implementation strategy.
  * @author Daniel B. Kazmer
- * @version 1.1.1
+ * @version 1.2.0
  * @see {@link https://github.com/dkazmer/Obsidium|GitHub}
  */
 export namespace Obsidium {
@@ -144,7 +144,7 @@ abstract class Observer<
 	public on<K extends OnKeys>(name: K, fn: Exclude<Notify[K], undefined>): Observer<T, Exclude<OnKeys, K>> {
 		this.notify[name]
 			? console.warn(`Obsidium: a subscription already exists for <${name}> on this instance.`)
-			: (this.notify[name] = (...e: unknown[]) => fn.call(this as Any, ...(e as [Any, Any]))); // Any's to avoid unnecessary, internal-facing TS gymnastics
+			: (this.notify[name] = (...e: unknown[]) => fn.call(this as Any, ...(e as [Any, Any, Any]))); // Any's to avoid unnecessary, internal-facing TS gymnastics
 
 		return this;
 	}
@@ -167,7 +167,7 @@ export class Intersection extends Observer<IntersectionObserver, Extract<keyof N
 		this.observer = new IntersectionObserver(
 			(entries, _obs) => {
 				for (const entry of entries) {
-					this.notify.intersect?.(entry);
+					this.notify.intersect?.(entry, this);
 					this.notifySub?.(entry);
 				}
 			},
@@ -188,7 +188,7 @@ export class Resize extends Observer<ResizeObserver, Extract<keyof Notify, 'resi
 
 		this.observer = new ResizeObserver((entries, _obs) => {
 			for (const entry of entries) {
-				this.notify.resize?.(entry);
+				this.notify.resize?.(entry, this);
 				this.notifySub?.(entry);
 			}
 		});
@@ -207,15 +207,15 @@ export class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'res
 					// biome-ignore format: compact
 					case 'childList': {
 						const { addedNodes, removedNodes } = mutation;
-						addedNodes.length && this.notify.add?.(addedNodes);
-						removedNodes.length && this.notify.remove?.(removedNodes);
-						(addedNodes.length || removedNodes.length) && this.notify.mutate?.(addedNodes, removedNodes)
+						addedNodes.length && this.notify.add?.(addedNodes, this);
+						removedNodes.length && this.notify.remove?.(removedNodes, this);
+						(addedNodes.length || removedNodes.length) && this.notify.mutate?.(addedNodes, removedNodes, this)
 					} break;
 
 					// biome-ignore format: compact
 					case 'attributes': {
 						const { target: t, attributeName } = mutation;
-						this.notify.attr?.({ attribute: attributeName, target: t });
+						this.notify.attr?.({ attribute: attributeName, target: t }, this);
 					}
 				}
 			}
@@ -244,12 +244,12 @@ type Any = any;
 
 // must include a user-facing default generic
 interface Notify<T = Obsidium> {
-	attr: (this: T, obj: { attribute: string | null; target: Node }) => void;
-	add: (this: T, nodes: NodeList) => void;
-	remove: (this: T, nodes: NodeList) => void;
-	mutate: (this: T, added: NodeList, removed: NodeList) => void;
-	resize: (this: T, entry: ResizeObserverEntry) => void;
-	intersect: (this: T, entry: IntersectionObserverEntry) => void;
+	attr: (this: T, obj: { attribute: string | null; target: Node }, obs: T) => void;
+	add: (this: T, nodes: NodeList, obs: T) => void;
+	remove: (this: T, nodes: NodeList, obs: T) => void;
+	mutate: (this: T, added: NodeList, removed: NodeList, obs: T) => void;
+	resize: (this: T, entry: ResizeObserverEntry, obs: T) => void;
+	intersect: (this: T, entry: IntersectionObserverEntry, obs: T) => void;
 }
 
 export type Obsidium<T extends keyof typeof Obsidium = keyof typeof Obsidium> = ReturnType<(typeof Obsidium)[T]>;
