@@ -6,7 +6,7 @@
  * @summary Created to encourage greater use of these high-value JS utilities,
  * as they're vastly underused and unknown, largely due to their complex implementation strategy.
  * @author Daniel B. Kazmer
- * @version 1.1.0
+ * @version 1.1.1
  * @see {@link https://github.com/dkazmer/Obsidium|GitHub}
  */
 export namespace Obsidium {
@@ -64,7 +64,7 @@ abstract class Observer<
 	protected observer!: T;
 	protected notify: { [K in OnKeys]?: Notify<ThisType<Observer<T, OnKeys>>>[K] } = {};
 	protected notifySub?(
-		this: ThisType<Obsidium>,
+		this: Obsidium,
 		arg: T extends IntersectionObserver
 			? IntersectionObserverEntry
 			: T extends ResizeObserver
