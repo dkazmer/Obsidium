@@ -3,11 +3,9 @@ Declarative wrapper class for the JS observers.
 
 ### Rationale
 
-Created to encourage greater use of these high-value JS utilities, as they're vastly unknown and criminally underused, largely due to their complex implementation strategy.
+Created to encourage greater use of these high-value JS utilities, as they're vastly unknown and criminally underused, largely due to their complex implementation strategy. I found that every time I wanted to use one or more of them, I'd have to go out of my way to research and refresh my understanding thereof.
 
-I found that every time I wanted to use one or more of them, I'd have to go out of my way to research and refresh my understanding thereof. Moreover, there are subtle differences in their implementation between them that's just annoying.
-
-I really just want to _set it and forget it._ `Obsidium` allows you to do just that…in a strongly typed, consolidated way. The idea is to instantiate the desired type of observer, then subscribe to it via `.on(…)` — without having to be aware of the underlying BS.
+Moreover, there are subtle differences in their implementation between them that are somewhat irritating. I really just want to _set it and forget it._ `Obsidium` allows you to do just that…in a strongly typed, consolidated way. 
 
 Obs. name | wraps…
 --------- | --------
@@ -16,6 +14,8 @@ Obs. name | wraps…
 `intersection` | `IntersectionObserver`
 
 ### Usage
+
+The idea is to instantiate the desired type of observer, then subscribe to it via `.on(…)` — fully IntelliSensed — without having to be aware of the underlying BS.
 
 Implementation examples (not exhaustive):
 ```ts
@@ -26,12 +26,13 @@ Obsidium.mutation(scopeElement)
 	.on('remove', myCallbackRmv);
 
 Obsidium.resize(element).on('resize', myCallbackRsz);
-Obsidium.intersection(element).on('intersect', function ({ contentBoxSize }) {
-	this.dump();
-	// do something...
-});
+
+Obsidium.intersection(element)
+	.on('intersect', function ({ contentBoxSize }) {
+		this.dump();
+		// do something...
+	});
 ```
-`on` method is fully IntelliSensed. Meaning, the available options will be made known.
 
 ### Members
 
@@ -46,7 +47,7 @@ Method | Desc.
 
 ### Settings
 
-The generic default settings are set for each observer, which can be overridden via the second, pointedly typed, parameter of the wrapped constructor, specific to the chosen observer type. **Caveat:** `resize` has no such settings as it's not complex enough to need one.
+The generic default settings are set for each observer, which can be optionally overridden via the second argument of the wrapped constructor, specific to the chosen observer type. **Caveat:** `resize` has no such settings arg. as it's not complex enough to need it.
 
 ```ts
 const myObs: Obsidium = Obsidium[obsName](elementObsd, obsOptions);
@@ -55,5 +56,5 @@ const myObs: Obsidium = Obsidium[obsName](elementObsd, obsOptions);
 ### Advanced
 
 - use the alternatively available `subscribe` method
-- find the `Obsidium` instance object as an additional callback param
+- find the `Obsidium` instance object as an additional callback parameter
 - import only the wrapper class you need
