@@ -248,7 +248,8 @@ interface Notify<T = Obsidium> {
 
 export type Obsidium<T extends keyof typeof Obsidium = keyof typeof Obsidium> = ReturnType<(typeof Obsidium)[T]>;
 
-type FromObserver<T> = T extends IntersectionObserver
+// tuple type: [<Observer entry>, <wrapper class>]
+type FromObserver<T extends IntersectionObserver | MutationObserver | ResizeObserver> = T extends IntersectionObserver
 	? [IntersectionObserverEntry, Intersection]
 	: T extends ResizeObserver
 		? [ResizeObserverEntry, Resize]
