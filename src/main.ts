@@ -10,9 +10,9 @@ window.ro = Obsidium.resize(document.body).on('resize', ({ contentBoxSize }) =>
 	console.log('>> resized!', contentBoxSize)
 );
 
-window.io = Obsidium.intersection(document.body).on('intersect', ({ isIntersecting }) =>
-	console.log('>> intersected!', isIntersecting)
-);
+window.io = Obsidium.intersection(document.body).on('intersect', function ({ isIntersecting }) {
+	console.log('>> intersected!', isIntersecting, this.dump);
+});
 
 declare global {
 	var mo: Obsidium;
@@ -24,8 +24,8 @@ window.mo.on('add', entry => {
 	console.log('>> entry', entry);
 });
 
-window.ro.subscribe(entry => {
-	console.log('>> entry', entry);
+window.ro.subscribe(function (entry) {
+	console.log('>> entry', entry, this.dump);
 });
 
 /* window.ro.subscribe(entry => {

@@ -25,8 +25,11 @@ Obsidium.mutation(scopeElement)
 	.on('add', myCallbackAdd)
 	.on('remove', myCallbackRmv);
 
-Obsidium.resize(element).on('resize', myCallback);
-Obsidium.intersection(element).on('intersect', myCallback);
+Obsidium.resize(element).on('resize', myCallbackRsz);
+Obsidium.intersection(element).on('intersect', function ({ contentBoxSize }) {
+	this.dump();
+	// do something...
+});
 ```
 `on` method is fully IntelliSensed. Meaning, the available options will be made known.
 

@@ -6,7 +6,7 @@
  * @summary Created to encourage greater use of these high-value JS utilities,
  * as they're vastly underused and unknown, largely due to their complex implementation strategy.
  * @author Daniel B. Kazmer
- * @version 1.1.0
+ * @version 1.1.1
  * @see {@link https://github.com/dkazmer/Obsidium|GitHub}
  */
 export namespace Obsidium {
@@ -62,8 +62,9 @@ abstract class Observer<
 	#isSuspended = true;
 
 	protected observer!: T;
-	protected notify: { [K in OnKeys]?: Notify[K] } = {};
+	protected notify: { [K in OnKeys]?: Notify<ThisType<Observer<T, OnKeys>>>[K] } = {};
 	protected notifySub?(
+		this: Obsidium,
 		arg: T extends IntersectionObserver
 			? IntersectionObserverEntry
 			: T extends ResizeObserver
@@ -143,8 +144,7 @@ abstract class Observer<
 	public on<K extends OnKeys>(name: K, fn: Exclude<Notify[K], undefined>): Observer<T, Exclude<OnKeys, K>> {
 		this.notify[name]
 			? console.warn(`Obsidium: a subscription already exists for <${name}> on this instance.`)
-			: // biome-ignore lint/suspicious/noExplicitAny: allow `any` for this particular line
-				(this.notify[name] = (...e: any[]) => fn.call(this, ...(e as [any, any])));
+			: (this.notify[name] = (...e: unknown[]) => fn.call(this as Any, ...(e as [Any, Any]))); // Any's to avoid unnecessary, internal-facing TS gymnastics
 
 		return this;
 	}
@@ -156,7 +156,7 @@ abstract class Observer<
 	public subscribe(fn: Exclude<typeof this.notifySub, undefined>): void {
 		this.notifySub
 			? console.warn('Obsidium: a <subscribe> notifier has already been created for this instance.')
-			: (this.notifySub = e => fn.call(this, e));
+			: (this.notifySub = e => fn.call(this as Any, e)); // Any to avoid unnecessary, internal-facing TS gymnastics
 	}
 }
 
@@ -239,13 +239,17 @@ function resolve<T = string>(msg: T) {
 // -----------------------------------------------------------------------------------------------------
 // types
 
-interface Notify<T = void> {
-	attr: (obj: { attribute: string | null; target: Node }) => T;
-	add: (nodes: NodeList) => T;
-	remove: (nodes: NodeList) => T;
-	mutate: (added: NodeList, removed: NodeList) => T;
-	resize: (entry: ResizeObserverEntry) => T;
-	intersect: (entry: IntersectionObserverEntry) => T;
+// biome-ignore lint/suspicious/noExplicitAny: allow `any` where needed
+type Any = any;
+
+// must include a user-facing default generic
+interface Notify<T = Obsidium> {
+	attr: (this: T, obj: { attribute: string | null; target: Node }) => void;
+	add: (this: T, nodes: NodeList) => void;
+	remove: (this: T, nodes: NodeList) => void;
+	mutate: (this: T, added: NodeList, removed: NodeList) => void;
+	resize: (this: T, entry: ResizeObserverEntry) => void;
+	intersect: (this: T, entry: IntersectionObserverEntry) => void;
 }
 
 export type Obsidium<T extends keyof typeof Obsidium = keyof typeof Obsidium> = ReturnType<(typeof Obsidium)[T]>;
