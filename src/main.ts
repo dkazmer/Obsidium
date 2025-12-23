@@ -1,16 +1,16 @@
 import { Obsidium } from './obsidium';
 
-window.mo = Obsidium.mutation(document.body)
+const { resize, mutation, intersection } = Obsidium;
+
+window.mo = mutation(document.body)
 	.on('add', nodes => console.log('>> added!', nodes))
 	.on('remove', nodes => console.log('>> removed!', nodes))
 	// .on('mutate', (added, removed) => console.log('>> mutated!', added, removed))
 	.on('attr', ({ attribute, target }) => console.log('>> attr!', attribute, target));
 
-window.ro = Obsidium.resize(document.body).on('resize', ({ contentBoxSize }) =>
-	console.log('>> resized!', contentBoxSize)
-);
+window.ro = resize(document.body).on('resize', ({ contentBoxSize }) => console.log('>> resized!', contentBoxSize));
 
-window.io = Obsidium.intersection(document.body).on('intersect', function ({ isIntersecting }, _obs) {
+window.io = intersection(document.body).on('intersect', function ({ isIntersecting }, _obs) {
 	console.log('>> intersected!', isIntersecting, this.dump);
 });
 

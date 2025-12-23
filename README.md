@@ -50,11 +50,11 @@ Method | Desc.
 The generic default settings are set for each observer, which can be optionally overridden via the second argument of the wrapped constructor, specific to the chosen observer type. **Caveat:** `resize` has no such settings arg. as it's not complex enough to need it.
 
 ```ts
-const myObs: Obsidium = Obsidium[obsName](elementObsd, obsOptions);
+const myObs: Obsidium = Obsidium[name](element, options?);
 ```
 
 ### Advanced
 
 - use the alternatively available `subscribe` method
 - find the `Obsidium` instance object as an additional callback parameter
-- import only the wrapper class you need
+- import only the wrapper class you need for optimal tree shaking
