@@ -240,21 +240,18 @@ export class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'res
 	}
 }
 
-class All<T extends MutationObserver | ResizeObserver | IntersectionObserver, OnKeys extends keyof Notify> {
+class All<OnKeys extends keyof Notify> {
 	// implements Observer<T, keyof Notify> {
-	// #on = this.on;
 	#mutation?: Mutation;
 	#resize?: Resize;
 	#intersection?: Intersection;
-	// #hasMutation = false;
-	// #hasResize = false;
-	// #hasIntersection = false;
 
 	#isSuspended = true;
 	#observers = new Set<Mutation | Resize | Intersection>();
 
 	constructor(
-		private target: T extends MutationObserver ? Node : Element,
+		// private target: T extends MutationObserver ? Node : Element,
+		private target: Node | Element,
 		private settings?: MutationObserverInit & IntersectionObserverInit
 	) {}
 
@@ -348,11 +345,7 @@ class All<T extends MutationObserver | ResizeObserver | IntersectionObserver, On
 		}
 	}
 
-	public on<K extends OnKeys>(
-		name: K,
-		fn: Exclude<Notify<FromObserver<T>[1]>[K], undefined>
-	): All<T, Exclude<OnKeys, K>> {
-		// this.#on(name, fn);
+	public on<K extends OnKeys>(name: K, fn: Notify[K]): All<Exclude<OnKeys, K>> {
 		this.determine(name, fn);
 		return this;
 	}
@@ -386,11 +379,11 @@ interface Notify<T = Obsidium> {
 type ObsKeys = Exclude<keyof typeof Obsidium, 'any'>;
 export type Obsidium<T extends ObsKeys = ObsKeys> = ReturnType<(typeof Obsidium)[T]>;
 
-// tuple type: [<Obs.entry>, <wrapper class>, <Obs.settings>]
+// tuple type: [<Obs.entry>, <wrapper class>]
 type FromObserver<T extends IntersectionObserver | MutationObserver | ResizeObserver> = T extends IntersectionObserver
-	? [IntersectionObserverEntry, Intersection, IntersectionObserverInit]
+	? [IntersectionObserverEntry, Intersection]
 	: T extends ResizeObserver
-		? [ResizeObserverEntry, Resize, never]
+		? [ResizeObserverEntry, Resize]
 		: T extends MutationObserver
-			? [MutationRecord[], Mutation, MutationObserverInit]
-			: [never, Obsidium, MutationObserverInit & IntersectionObserverInit];
+			? [MutationRecord[], Mutation]
+			: [never, Obsidium];
