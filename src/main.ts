@@ -5,6 +5,7 @@ const { resize, intersection } = Obsidium;
 window.mo = new Mutation(document.body)
 	.on('add', nodes => console.log('>> added!', nodes))
 	.on('remove', nodes => console.log('>> removed!', nodes))
+	.on('mutate', nodes => console.log('>> removed!', nodes))
 	// .on('mutate', (added, removed) => console.log('>> mutated!', added, removed))
 	.on('attr', ({ attribute, target }) => console.log('>> attr!', attribute, target));
 
@@ -32,13 +33,11 @@ window.ro.subscribe(function (entry) {
 	console.log('>>> entry', entry);
 });
  */
-// let s: Set<string> = new Set()
-// s.add(1)
 
-const multi: Obsidia<ResizeObserver> = Obsidia(document.body)
+const multi: Obsidia<IntersectionObserver> = Obsidia(document.body)
 	// multi.on('add', (added, removed) => {
-	// 	console.log('>> any: mutate', added, removed);
+	// 	console.log('>> Obsidia: mutate', added, removed);
 	// })
 	.on('resize', ({ contentBoxSize }) => {
-		console.log('>> any: resize', contentBoxSize);
+		console.log('>> Obsidia: resize', contentBoxSize);
 	});

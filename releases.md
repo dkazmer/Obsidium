@@ -1,3 +1,8 @@
+# Release notes: 2.0.0
+- new feature: `Obsidia`: attach multiple observers to the same element at once
+- extensive type optimizations
+
+
 # Release notes: 1.2.0
 - notifer callbacks: return instance as final argument
 - precise `this` context for all notifer callbacks

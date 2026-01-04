@@ -64,31 +64,22 @@ export namespace Obsidium {
  *   .on('mutate', mutateFn)
  *   .on('resize', resizeFn);
  */
-export function Obsidia<
-	T extends MutationObserver | ResizeObserver | IntersectionObserver,
-	U extends keyof Notify = T extends MutationObserver
-		? 'add' | 'attr' | 'mutate' | 'remove'
-		: T extends ResizeObserver
-			? 'resize'
-			: T extends IntersectionObserver
-				? 'intersect'
-				: undefined
->(target: T extends MutationObserver ? Node : Element, settings?: MutationObserverInit & IntersectionObserverInit) {
-	return new All<U>(target, settings);
+export function Obsidia<T extends MutationObserver & ResizeObserver & IntersectionObserver>(
+	target: T extends MutationObserver ? Node : Element,
+	settings?: MutationObserverInit & IntersectionObserverInit
+) {
+	return new All<T>(target, settings);
 }
 
 // -----------------------------------------------------------------------------------------------------
 // classes
 
-abstract class Observer<
-	T extends MutationObserver | ResizeObserver | IntersectionObserver,
-	OnKeys extends keyof Notify
-> {
+abstract class Observer<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 	#isSuspended = true;
 
 	protected observer!: T;
 	protected notify: { [K in OnKeys]?: Notify<ThisType<this>>[K] } = {};
-	protected notifySub?(this: FromObserver<T>[1], arg: FromObserver<T>[0], obs: Obsidium): void;
+	protected notifySub?(this: ByObs<T>[1], arg: ByObs<T>[0], obs: Obsidium): void;
 
 	public type = '';
 
@@ -159,7 +150,7 @@ abstract class Observer<
 	 */
 	public on<K extends OnKeys>(
 		name: K,
-		fn: Exclude<Notify<FromObserver<T>[1]>[K], undefined>
+		fn: Exclude<Notify<ByObs<T>[1]>[K], undefined>
 	): Observer<T, Exclude<OnKeys, K>> {
 		this.notify[name]
 			? console.warn(`Obsidium: a subscription already exists for <${name}> on this instance.`)
@@ -179,7 +170,7 @@ abstract class Observer<
 	}
 }
 
-export class Intersection extends Observer<IntersectionObserver, Extract<keyof Notify, 'intersect'>> {
+export class Intersection extends Observer<IntersectionObserver> {
 	constructor(target: Element, settings?: IntersectionObserverInit) {
 		super(target);
 
@@ -201,7 +192,7 @@ export class Intersection extends Observer<IntersectionObserver, Extract<keyof N
 	}
 }
 
-export class Resize extends Observer<ResizeObserver, Extract<keyof Notify, 'resize'>> {
+export class Resize extends Observer<ResizeObserver> {
 	constructor(target: Element) {
 		super(target);
 
@@ -216,7 +207,7 @@ export class Resize extends Observer<ResizeObserver, Extract<keyof Notify, 'resi
 	}
 }
 
-export class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'resize' | 'intersect'>> {
+export class Mutation extends Observer<MutationObserver> {
 	constructor(target: Node, settings?: MutationObserverInit) {
 		super(target, settings);
 
@@ -246,8 +237,8 @@ export class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'res
 	}
 }
 
-class All<OnKeys extends keyof Notify> {
-	// implements Observer<MutationObserver | ResizeObserver | IntersectionObserver, OnKeys>
+class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
+	// implements Observer<ObserverType, OnKeys>
 	#mutation?: Mutation;
 	#resize?: Resize;
 	#intersection?: Intersection;
@@ -350,7 +341,7 @@ class All<OnKeys extends keyof Notify> {
 		}
 	}
 
-	public on<K extends OnKeys>(name: K, fn: Notify[K]): All<Exclude<OnKeys, K>> {
+	public on<K extends OnKeys>(name: K, fn: Notify[K]) /* : All<Exclude<OnKeys, K>>  */ {
 		this.determine(name, fn);
 		return this;
 	}
@@ -370,6 +361,7 @@ function resolve<T = string>(msg: T) {
 
 // biome-ignore lint/suspicious/noExplicitAny: allow `any` where needed
 type Any = any;
+type ObserverType = MutationObserver | ResizeObserver | IntersectionObserver;
 
 // must include a user-facing default generic
 interface Notify<T = Obsidium> {
@@ -382,34 +374,18 @@ interface Notify<T = Obsidium> {
 }
 
 export type Obsidium<T extends keyof typeof Obsidium = keyof typeof Obsidium> = ReturnType<(typeof Obsidium)[T]>;
-export type Obsidia<
-	T extends MutationObserver | ResizeObserver | IntersectionObserver = never,
-	U extends keyof Notify = T extends MutationObserver
-		? 'add' | 'attr' | 'mutate' | 'remove'
-		: T extends ResizeObserver
-			? 'resize'
-			: T extends IntersectionObserver
-				? 'intersect'
-				: never
-> = /* new () =>  */ All<U>;
-/* export interface Obsidia<
-	T extends MutationObserver | ResizeObserver | IntersectionObserver = never,
-	U extends keyof Notify = T extends MutationObserver
-		? 'add' | 'attr' | 'mutate' | 'remove'
-		: T extends ResizeObserver
-			? 'resize'
-			: T extends IntersectionObserver
-				? 'intersect'
-				: undefined
-> {
+export type Obsidia<T extends ObserverType = any> = All<T>;
+// > = /* new () =>  */ All<U>;
+
+/* export interface Obsidia<T extends ObserverType = any> {
 	new (): All<U>;
 } */
 
-// tuple type: [<Obs.entry>, <wrapper class>]
-type FromObserver<T extends IntersectionObserver | MutationObserver | ResizeObserver> = T extends IntersectionObserver
-	? [IntersectionObserverEntry, Intersection]
-	: T extends ResizeObserver
-		? [ResizeObserverEntry, Resize]
+// tuple type: [<Obs.entry>, <wrapper class>, <on.keys>]
+type ByObs<T extends ObserverType> = T extends ResizeObserver
+	? [ResizeObserverEntry, Resize, 'resize']
+	: T extends IntersectionObserver
+		? [IntersectionObserverEntry, Intersection, 'intersect']
 		: T extends MutationObserver
-			? [MutationRecord[], Mutation]
-			: [never, Obsidium];
+			? [MutationRecord[], Mutation, 'add' | 'attr' | 'mutate' | 'remove']
+			: [never, Obsidium, keyof Notify];

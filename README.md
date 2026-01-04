@@ -58,4 +58,4 @@ const myObs: Obsidium = Obsidium[name](element, options?);
 - use the alternatively available `subscribe` method
 - find the `Obsidium` instance object as an additional callback parameter
 - import only the wrapper class you need for optimal _tree shaking_
-- attach multiple observers to the same element at once with `Obsidium.any`
+- attach multiple observers to the same element at once with `Obsidia`
