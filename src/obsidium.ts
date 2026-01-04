@@ -50,25 +50,31 @@ export namespace Obsidium {
 	export function mutation(target: Node, settings?: MutationObserverInit) {
 		return new Mutation(target, settings);
 	}
+}
 
-	/**
-	 * Declarative wrapper for _any / all_ of the three major JS observers. Control methods:
-	 * - {@linkcode Observer.suspend|suspend}
-	 * - {@linkcode Observer.resume|resume}
-	 * - {@linkcode Observer.toggle|toggle}
-	 * - {@linkcode Observer.dump|dump}
-	 * @summary Good for attaching multiple observers to the same element at once.
-	 * @example
-	 * Obsidium.any(element)
-	 *   .on('mutate', mutateFn)
-	 *   .on('resize', resizeFn);
-	 */
-	export function any<T extends MutationObserver | ResizeObserver | IntersectionObserver>(
-		target: T extends MutationObserver ? Node : Element,
-		settings?: MutationObserverInit & IntersectionObserverInit
-	) {
-		return new All(target, settings);
-	}
+/**
+ * Declarative wrapper for _any / all_ of the three major JS observers. Control methods:
+ * - {@linkcode All.suspend|suspend}
+ * - {@linkcode All.resume|resume}
+ * - {@linkcode All.toggle|toggle}
+ * - {@linkcode All.dump|dump}
+ * @summary Good for attaching multiple observers to the same element at once.
+ * @example
+ * Obsidia(element)
+ *   .on('mutate', mutateFn)
+ *   .on('resize', resizeFn);
+ */
+export function Obsidia<
+	T extends MutationObserver | ResizeObserver | IntersectionObserver,
+	U extends keyof Notify = T extends MutationObserver
+		? 'add' | 'attr' | 'mutate' | 'remove'
+		: T extends ResizeObserver
+			? 'resize'
+			: T extends IntersectionObserver
+				? 'intersect'
+				: undefined
+>(target: T extends MutationObserver ? Node : Element, settings?: MutationObserverInit & IntersectionObserverInit) {
+	return new All<U>(target, settings);
 }
 
 // -----------------------------------------------------------------------------------------------------
@@ -241,7 +247,7 @@ export class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'res
 }
 
 class All<OnKeys extends keyof Notify> {
-	// implements Observer<T, keyof Notify> {
+	// implements Observer<MutationObserver | ResizeObserver | IntersectionObserver, OnKeys>
 	#mutation?: Mutation;
 	#resize?: Resize;
 	#intersection?: Intersection;
@@ -250,7 +256,6 @@ class All<OnKeys extends keyof Notify> {
 	#observers = new Set<Mutation | Resize | Intersection>();
 
 	constructor(
-		// private target: T extends MutationObserver ? Node : Element,
 		private target: Node | Element,
 		private settings?: MutationObserverInit & IntersectionObserverInit
 	) {}
@@ -270,7 +275,7 @@ class All<OnKeys extends keyof Notify> {
 
 			case 'resize':
 				if (!this.#resize) {
-					this.#resize = new Resize(this.target as Element); // don't like this casting!
+					this.#resize = new Resize(this.target as Element);
 					this.#observers.add(this.#resize);
 				}
 				this.#resize.on(name, fn);
@@ -278,7 +283,7 @@ class All<OnKeys extends keyof Notify> {
 
 			case 'intersect':
 				if (!this.#intersection) {
-					this.#intersection = new Intersection(this.target as Element, this.settings); // don't like this casting!
+					this.#intersection = new Intersection(this.target as Element, this.settings);
 					this.#observers.add(this.#intersection);
 				}
 				this.#intersection.on(name, fn);
@@ -376,8 +381,29 @@ interface Notify<T = Obsidium> {
 	intersect: (this: T, entry: IntersectionObserverEntry, obs: Obsidium<'intersection'>) => void;
 }
 
-type ObsKeys = Exclude<keyof typeof Obsidium, 'any'>;
-export type Obsidium<T extends ObsKeys = ObsKeys> = ReturnType<(typeof Obsidium)[T]>;
+export type Obsidium<T extends keyof typeof Obsidium = keyof typeof Obsidium> = ReturnType<(typeof Obsidium)[T]>;
+export type Obsidia<
+	T extends MutationObserver | ResizeObserver | IntersectionObserver = never,
+	U extends keyof Notify = T extends MutationObserver
+		? 'add' | 'attr' | 'mutate' | 'remove'
+		: T extends ResizeObserver
+			? 'resize'
+			: T extends IntersectionObserver
+				? 'intersect'
+				: never
+> = /* new () =>  */ All<U>;
+/* export interface Obsidia<
+	T extends MutationObserver | ResizeObserver | IntersectionObserver = never,
+	U extends keyof Notify = T extends MutationObserver
+		? 'add' | 'attr' | 'mutate' | 'remove'
+		: T extends ResizeObserver
+			? 'resize'
+			: T extends IntersectionObserver
+				? 'intersect'
+				: undefined
+> {
+	new (): All<U>;
+} */
 
 // tuple type: [<Obs.entry>, <wrapper class>]
 type FromObserver<T extends IntersectionObserver | MutationObserver | ResizeObserver> = T extends IntersectionObserver

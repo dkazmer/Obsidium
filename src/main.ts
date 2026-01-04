@@ -1,4 +1,4 @@
-import { Mutation, Obsidium } from './obsidium';
+import { Mutation, Obsidia, Obsidium } from './obsidium';
 
 const { resize, intersection } = Obsidium;
 
@@ -32,11 +32,13 @@ window.ro.subscribe(function (entry) {
 	console.log('>>> entry', entry);
 });
  */
+// let s: Set<string> = new Set()
+// s.add(1)
 
-Obsidium.any(document.body)
-	.on('mutate', (added, removed) => {
-		console.log('>> any: mutate', added, removed);
-	})
+const multi: Obsidia<ResizeObserver> = Obsidia(document.body)
+	// multi.on('add', (added, removed) => {
+	// 	console.log('>> any: mutate', added, removed);
+	// })
 	.on('resize', ({ contentBoxSize }) => {
 		console.log('>> any: resize', contentBoxSize);
 	});
