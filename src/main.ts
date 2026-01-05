@@ -34,10 +34,14 @@ window.ro.subscribe(function (entry) {
 });
  */
 
-const multi: Obsidia<IntersectionObserver> = Obsidia(document.body)
-	// multi.on('add', (added, removed) => {
+const multi: Obsidia = Obsidia<ResizeObserver>(document.body)
+	// .on('add', (added, removed) => {
 	// 	console.log('>> Obsidia: mutate', added, removed);
 	// })
 	.on('resize', ({ contentBoxSize }) => {
 		console.log('>> Obsidia: resize', contentBoxSize);
 	});
+
+const multi2: Obsidia = Obsidia<ResizeObserver>(document.body).on('resize', ({ contentBoxSize }) => {
+	console.log('>> Obsidia: resize', contentBoxSize);
+});

@@ -6,7 +6,7 @@
  * @summary Created to encourage greater use of these high-value JS utilities,
  * as they're vastly underused and unknown, largely due to their complex implementation strategy.
  * @author Daniel B. Kazmer
- * @version 1.2.0
+ * @version 2.0.0
  * @see {@link https://github.com/dkazmer/Obsidium|GitHub}
  */
 export namespace Obsidium {
@@ -64,7 +64,7 @@ export namespace Obsidium {
  *   .on('mutate', mutateFn)
  *   .on('resize', resizeFn);
  */
-export function Obsidia<T extends MutationObserver & ResizeObserver & IntersectionObserver>(
+export function Obsidia<T extends ObserverType>(
 	target: T extends MutationObserver ? Node : Element,
 	settings?: MutationObserverInit & IntersectionObserverInit
 ) {
@@ -341,7 +341,7 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 		}
 	}
 
-	public on<K extends OnKeys>(name: K, fn: Notify[K]) /* : All<Exclude<OnKeys, K>>  */ {
+	public on<K extends OnKeys>(name: K, fn: Notify[K]): All<T, Exclude<OnKeys, K>> {
 		this.determine(name, fn);
 		return this;
 	}
@@ -374,18 +374,15 @@ interface Notify<T = Obsidium> {
 }
 
 export type Obsidium<T extends keyof typeof Obsidium = keyof typeof Obsidium> = ReturnType<(typeof Obsidium)[T]>;
-export type Obsidia<T extends ObserverType = any> = All<T>;
-// > = /* new () =>  */ All<U>;
+export type Obsidia = All<ObserverType>;
+// export type Obsidia = ReturnType<typeof Obsidia>;
+// export type Obsidia<T extends ObserverType = ObserverType> = All<T>;
 
-/* export interface Obsidia<T extends ObserverType = any> {
-	new (): All<U>;
-} */
-
-// tuple type: [<Obs.entry>, <wrapper class>, <on.keys>]
-type ByObs<T extends ObserverType> = T extends ResizeObserver
-	? [ResizeObserverEntry, Resize, 'resize']
-	: T extends IntersectionObserver
-		? [IntersectionObserverEntry, Intersection, 'intersect']
+// tuple type: [<Obs.entry>, <wrapper class>, <on.keys>] // oddly can't start with ResizeObserver
+type ByObs<T extends ObserverType | undefined> = T extends IntersectionObserver
+	? [IntersectionObserverEntry, Intersection, 'intersect']
+	: T extends ResizeObserver
+		? [ResizeObserverEntry, Resize, 'resize']
 		: T extends MutationObserver
 			? [MutationRecord[], Mutation, 'add' | 'attr' | 'mutate' | 'remove']
-			: [never, Obsidium, keyof Notify];
+			: [never, Obsidium, never];
