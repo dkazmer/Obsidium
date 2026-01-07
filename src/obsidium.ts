@@ -99,7 +99,7 @@ abstract class Observer<T extends ObserverType, OnKeys extends keyof Notify = By
 	 */
 	public resume() {
 		if (this.#isSuspended === false) {
-			console.warn('Obsidium: observer is already running...');
+			console.warn('Obsidium: observer is already running.');
 			return;
 		}
 
@@ -116,7 +116,7 @@ abstract class Observer<T extends ObserverType, OnKeys extends keyof Notify = By
 	 */
 	public suspend() {
 		if (this.#isSuspended === true) {
-			console.warn('Obsidium: observer is already suspended...');
+			console.warn('Obsidium: observer is already suspended.');
 			return;
 		}
 
@@ -297,7 +297,7 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 	 */
 	public resume() {
 		if (this.#isSuspended === false) {
-			console.warn('Obsidium: observer is already running...');
+			console.warn('Obsidia: observer/s already running.');
 			return;
 		}
 
@@ -314,7 +314,7 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 	 */
 	public suspend() {
 		if (this.#isSuspended === true) {
-			console.warn('Obsidium: observer is already suspended...');
+			console.warn('Obsidia: observer/s already suspended.');
 			return;
 		}
 
