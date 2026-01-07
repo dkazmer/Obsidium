@@ -9,10 +9,10 @@ window.mo = new Mutation(document.body)
 	// .on('mutate', (added, removed) => console.log('>> mutated!', added, removed))
 	.on('attr', ({ attribute, target }) => console.log('>> attr!', attribute, target));
 
-window.ro = resize(document.body).on('resize', ({ contentBoxSize }) => console.log('>> resized!', contentBoxSize));
+window.ro = resize(document.body).on('resize', ([ent]) => console.log('>> resized!', ent!.contentBoxSize));
 
-window.io = intersection(document.body).on('intersect', function ({ isIntersecting }, _obs) {
-	console.log('>> intersected!', isIntersecting, this.dump);
+window.io = intersection(document.body).on('intersect', function ([ent], _obs) {
+	console.log('>> intersected!', ent!.isIntersecting, this.dump);
 });
 
 declare global {
@@ -41,10 +41,10 @@ window.multi = Obsidia<ResizeObserver>(document.body)
 	// .on('add', (added, removed) => {
 	// 	console.log('>> Obsidia: mutate', added, removed);
 	// })
-	.on('resize', ({ contentBoxSize }) => {
-		console.log('>> Obsidia: resize', contentBoxSize);
+	.on('resize', ([ent]) => {
+		console.log('>> Obsidia: resize', ent!.contentBoxSize);
 	});
 
-window.multi2 = Obsidia<ResizeObserver>(document.body).on('resize', ({ contentBoxSize }) => {
-	console.log('>> Obsidia: resize', contentBoxSize);
+window.multi2 = Obsidia<ResizeObserver>(document.body).on('resize', ([ent]) => {
+	console.log('>> Obsidia: resize', ent!.contentBoxSize);
 });

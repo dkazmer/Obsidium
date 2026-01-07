@@ -94,9 +94,9 @@ describe('Resize Observer', () => {
 		const spy = vi.spyOn(mockMethods, 'ro');
 
 		return new Promise<ResizeObserverEntry>(res => {
-			ro.on('resize', entry => {
-				mockMethods.ro(entry);
-				res(entry);
+			ro.on('resize', ([entry]) => {
+				mockMethods.ro(entry!);
+				res(entry!);
 				setTimeout(() => ro.dump(), 0);
 				// ro.suspend();
 				document.body.removeChild(elem);
@@ -133,9 +133,9 @@ describe('Intersection Observer', () => {
 		const spy = vi.spyOn(mockMethods, 'io');
 
 		return new Promise<IntersectionObserverEntry>(res => {
-			io.on('intersect', entry => {
-				mockMethods.io(entry);
-				res(entry);
+			io.on('intersect', ([entry]) => {
+				mockMethods.io(entry!);
+				res(entry!);
 				setTimeout(() => io.dump(), 0);
 				// io.suspend();
 				document.body.removeChild(elem);

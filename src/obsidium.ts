@@ -176,10 +176,12 @@ export class Intersection extends Observer<IntersectionObserver> {
 
 		this.observer = new IntersectionObserver(
 			(entries, _obs) => {
-				for (const entry of entries) {
+				/* for (const entry of entries) {
 					this.notify.intersect?.(entry, this);
 					this.notifySub?.(entry, this);
-				}
+				} */
+				this.notify.intersect?.(entries, this);
+				this.notifySub?.(entries, this);
 			},
 			{
 				root: null,
@@ -197,9 +199,13 @@ export class Resize extends Observer<ResizeObserver> {
 		super(target);
 
 		this.observer = new ResizeObserver((entries, _obs) => {
-			for (const entry of entries) {
+			/* for (const entry of entries) {
 				this.notify.resize?.(entry, this);
 				this.notifySub?.(entry, this);
+			} */
+			if (entries) {
+				this.notify.resize?.(entries, this);
+				this.notifySub?.(entries, this);
 			}
 		});
 
@@ -337,7 +343,6 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 		});
 
 		for (const prop in this) {
-			console.log('>> prop', prop);
 			Object.hasOwn(this, prop) && delete this[prop];
 		}
 	}
@@ -370,8 +375,8 @@ interface Notify<T = Obsidium> {
 	add: (this: T, nodes: NodeList, obs: Obsidium<'mutation'>) => void;
 	remove: (this: T, nodes: NodeList, obs: Obsidium<'mutation'>) => void;
 	mutate: (this: T, added: NodeList, removed: NodeList, obs: Obsidium<'mutation'>) => void;
-	resize: (this: T, entry: ResizeObserverEntry, obs: Obsidium<'resize'>) => void;
-	intersect: (this: T, entry: IntersectionObserverEntry, obs: Obsidium<'intersection'>) => void;
+	resize: (this: T, entry: ResizeObserverEntry[], obs: Obsidium<'resize'>) => void;
+	intersect: (this: T, entry: IntersectionObserverEntry[], obs: Obsidium<'intersection'>) => void;
 }
 
 export type Obsidium<T extends keyof typeof Obsidium = keyof typeof Obsidium> = ReturnType<(typeof Obsidium)[T]>;
@@ -381,9 +386,9 @@ export type Obsidia = All<ObserverType>;
 
 // tuple type: [<Obs.entry>, <wrapper class>, <on.keys>] // oddly can't start with ResizeObserver
 type ByObs<T extends ObserverType | undefined> = T extends IntersectionObserver
-	? [IntersectionObserverEntry, Intersection, 'intersect']
+	? [IntersectionObserverEntry[], Intersection, 'intersect']
 	: T extends ResizeObserver
-		? [ResizeObserverEntry, Resize, 'resize']
+		? [ResizeObserverEntry[], Resize, 'resize']
 		: T extends MutationObserver
 			? [MutationRecord[], Mutation, 'add' | 'attr' | 'mutate' | 'remove']
 			: [never, Obsidium, never];

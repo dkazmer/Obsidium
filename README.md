@@ -28,7 +28,7 @@ Obsidium.mutation(scopeElement)
 Obsidium.resize(element).on('resize', resizeFn);
 
 Obsidium.intersection(element)
-	.on('intersect', function ({ contentBoxSize }) {
+	.on('intersect', function ([entry]) {
 		this.dump();
 		// do something...
 	});
