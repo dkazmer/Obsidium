@@ -21,30 +21,26 @@ declare global {
 	var io: Obsidium<'intersection'>;
 
 	var multi: Obsidia;
-	var multi2: Obsidia;
+	// var multi2: Obsidia;
 }
 
-window.mo.on('add', entry => {
+/* window.mo.on('add', entry => {
 	console.log('>> entry', entry);
 });
 
 window.ro.subscribe(function (entry) {
 	console.log('>> entry', entry, this.dump);
-});
+}); */
 
 /* window.ro.subscribe(entry => {
 	console.log('>>> entry', entry);
 });
  */
 
-window.multi = Obsidia<ResizeObserver>(document.body)
-	// .on('add', (added, removed) => {
-	// 	console.log('>> Obsidia: mutate', added, removed);
-	// })
+window.multi = Obsidia<IntersectionObserver | ResizeObserver>(document.body)
+	.on('intersect', ([ent]) => {
+		console.log('>> Obsidia: intersect', ent!.boundingClientRect);
+	})
 	.on('resize', ([ent]) => {
 		console.log('>> Obsidia: resize', ent!.contentBoxSize);
 	});
-
-window.multi2 = Obsidia<ResizeObserver>(document.body).on('resize', ([ent]) => {
-	console.log('>> Obsidia: resize', ent!.contentBoxSize);
-});
