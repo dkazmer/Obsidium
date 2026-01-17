@@ -63,7 +63,6 @@ const myObs: Obsidium = Obsidium[name](element, options?);
 
 ---
 
-<!-- ![Coded by human ><](https://webshifted.com/tribute/imgs/blog.gif) -->
 <img src="https://webshifted.com/tribute/imgs/blog.gif" align="right" />
 
 <img src="https://webshifted.com/HumanMade/retina/human-coded.png" height="21" /><br>

@@ -1,6 +1,6 @@
 {
 	"name": "obsidium",
-	"version": "1.2.0",
+	"version": "2.0.0",
 	"description": "A declarative wrapper for all the JS observers.",
 	"main": "index.js",
 	"scripts": {
