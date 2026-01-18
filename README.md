@@ -28,11 +28,12 @@ Obsidium.mutation(scopeElement)
 Obsidium.resize(element).on('resize', resizeFn);
 
 Obsidium.intersection(element)
-	.on('intersect', function ({ contentBoxSize }) {
+	.on('intersect', function ([entry]) {
 		this.dump();
 		// do something...
 	});
 ```
+See more [code examples](https://github.com/dkazmer/Obsidium/wiki/Code-examples).
 
 ### Members
 
@@ -57,4 +58,12 @@ const myObs: Obsidium = Obsidium[name](element, options?);
 
 - use the alternatively available `subscribe` method
 - find the `Obsidium` instance object as an additional callback parameter
+- attach multiple observers to the same element at once with `Obsidia`
 - import only the wrapper class you need for optimal _tree shaking_
+
+---
+
+<img src="https://webshifted.com/tribute/imgs/blog.gif" align="right" title="me" />
+
+<img src="https://webshifted.com/HumanMade/retina/human-coded.png" height="24" title="coded by human (webshifted.com/HumanMade)" /><br>
+[Daniel K.](https://github.com/dkazmer)

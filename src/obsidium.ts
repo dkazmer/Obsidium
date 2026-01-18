@@ -6,7 +6,7 @@
  * @summary Created to encourage greater use of these high-value JS utilities,
  * as they're vastly underused and unknown, largely due to their complex implementation strategy.
  * @author Daniel B. Kazmer
- * @version 1.2.0
+ * @version 2.0.0
  * @see {@link https://github.com/dkazmer/Obsidium|GitHub}
  */
 export namespace Obsidium {
@@ -17,7 +17,7 @@ export namespace Obsidium {
 	 * - {@linkcode Observer.toggle|toggle}
 	 * - {@linkcode Observer.dump|dump}
 	 * @example
-	 * Obsidium.intersection(element).on('intersect', myCallback);
+	 * Obsidium.intersection(element).on('intersect', callbackFn);
 	 */
 	export function intersection(target: Element, settings?: IntersectionObserverInit) {
 		return new Intersection(target, settings);
@@ -30,7 +30,7 @@ export namespace Obsidium {
 	 * - {@linkcode Observer.toggle|toggle}
 	 * - {@linkcode Observer.dump|dump}
 	 * @example
-	 * Obsidium.resize(element).on('resize', myCallback);
+	 * Obsidium.resize(element).on('resize', callbackFn);
 	 */
 	export function resize(target: Element) {
 		return new Resize(target);
@@ -44,26 +44,42 @@ export namespace Obsidium {
 	 * - {@linkcode Observer.dump|dump}
 	 * @example
 	 * Obsidium.mutation(scopeElement)
-	 *   .on('add', myCallbackAdd)
-	 *   .on('remove', myCallbackRmv);
+	 *   .on('add', addFn)
+	 *   .on('remove', removeFn);
 	 */
 	export function mutation(target: Node, settings?: MutationObserverInit) {
 		return new Mutation(target, settings);
 	}
 }
 
+/**
+ * Declarative wrapper for _any / all_ of the three major JS observers. Control methods:
+ * - {@linkcode All.suspend|suspend}
+ * - {@linkcode All.resume|resume}
+ * - {@linkcode All.toggle|toggle}
+ * - {@linkcode All.dump|dump}
+ * @summary Good for attaching multiple observers to the same element at once.
+ * @example
+ * Obsidia(element)
+ *   .on('mutate', mutateFn)
+ *   .on('resize', resizeFn);
+ */
+export function Obsidia<T extends ObserverType>(
+	target: T extends MutationObserver ? Node : Element,
+	settings?: MutationObserverInit & IntersectionObserverInit
+) {
+	return new All<T>(target, settings);
+}
+
 // -----------------------------------------------------------------------------------------------------
 // classes
 
-abstract class Observer<
-	T extends MutationObserver | ResizeObserver | IntersectionObserver,
-	OnKeys extends keyof Notify
-> {
+abstract class Observer<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 	#isSuspended = true;
 
 	protected observer!: T;
 	protected notify: { [K in OnKeys]?: Notify<ThisType<this>>[K] } = {};
-	protected notifySub?(this: FromObserver<T>[1], arg: FromObserver<T>[0], obs: Obsidium): void;
+	protected notifySub?(this: ByObs<T>[1], arg: ByObs<T>[0], obs: Obsidium): void;
 
 	public type = '';
 
@@ -72,7 +88,7 @@ abstract class Observer<
 		private settings?: MutationObserverInit
 	) {
 		resolve('Safe to invoke sub class methods').then(() => {
-			this.type = this.observer.constructor.name;
+			this.type = this.observer?.constructor.name || 'any';
 			// this.resume();
 		});
 	}
@@ -83,7 +99,7 @@ abstract class Observer<
 	 */
 	public resume() {
 		if (this.#isSuspended === false) {
-			console.warn('Obsidium: observer is already running...');
+			console.warn('Obsidium: observer is already running.');
 			return;
 		}
 
@@ -100,7 +116,7 @@ abstract class Observer<
 	 */
 	public suspend() {
 		if (this.#isSuspended === true) {
-			console.warn('Obsidium: observer is already suspended...');
+			console.warn('Obsidium: observer is already suspended.');
 			return;
 		}
 
@@ -134,7 +150,7 @@ abstract class Observer<
 	 */
 	public on<K extends OnKeys>(
 		name: K,
-		fn: Exclude<Notify<FromObserver<T>[1]>[K], undefined>
+		fn: Exclude<Notify<ByObs<T>[1]>[K], undefined>
 	): Observer<T, Exclude<OnKeys, K>> {
 		this.notify[name]
 			? console.warn(`Obsidium: a subscription already exists for <${name}> on this instance.`)
@@ -154,16 +170,18 @@ abstract class Observer<
 	}
 }
 
-export class Intersection extends Observer<IntersectionObserver, Extract<keyof Notify, 'intersect'>> {
+export class Intersection extends Observer<IntersectionObserver> {
 	constructor(target: Element, settings?: IntersectionObserverInit) {
 		super(target);
 
 		this.observer = new IntersectionObserver(
 			(entries, _obs) => {
-				for (const entry of entries) {
+				/* for (const entry of entries) {
 					this.notify.intersect?.(entry, this);
 					this.notifySub?.(entry, this);
-				}
+				} */
+				this.notify.intersect?.(entries, this);
+				this.notifySub?.(entries, this);
 			},
 			{
 				root: null,
@@ -176,14 +194,18 @@ export class Intersection extends Observer<IntersectionObserver, Extract<keyof N
 	}
 }
 
-export class Resize extends Observer<ResizeObserver, Extract<keyof Notify, 'resize'>> {
+export class Resize extends Observer<ResizeObserver> {
 	constructor(target: Element) {
 		super(target);
 
 		this.observer = new ResizeObserver((entries, _obs) => {
-			for (const entry of entries) {
+			/* for (const entry of entries) {
 				this.notify.resize?.(entry, this);
 				this.notifySub?.(entry, this);
+			} */
+			if (entries) {
+				this.notify.resize?.(entries, this);
+				this.notifySub?.(entries, this);
 			}
 		});
 
@@ -191,7 +213,7 @@ export class Resize extends Observer<ResizeObserver, Extract<keyof Notify, 'resi
 	}
 }
 
-export class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'resize' | 'intersect'>> {
+export class Mutation extends Observer<MutationObserver> {
 	constructor(target: Node, settings?: MutationObserverInit) {
 		super(target, settings);
 
@@ -221,6 +243,116 @@ export class Mutation extends Observer<MutationObserver, keyof Omit<Notify, 'res
 	}
 }
 
+class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
+	// implements Observer<ObserverType, OnKeys>
+	#mutation?: Mutation;
+	#resize?: Resize;
+	#intersection?: Intersection;
+
+	#isSuspended = true;
+	#observers = new Set<Mutation | Resize | Intersection>();
+
+	constructor(
+		private target: Node | Element,
+		private settings?: MutationObserverInit & IntersectionObserverInit
+	) {}
+
+	private determine(name: OnKeys, fn: (...args: Any[]) => void) {
+		switch (name) {
+			case 'add':
+			case 'remove':
+			case 'mutate':
+			case 'attr':
+				if (!this.#mutation) {
+					this.#mutation = new Mutation(this.target as Node, this.settings);
+					this.#observers.add(this.#mutation);
+				}
+				this.#mutation.on(name, fn);
+				break;
+
+			case 'resize':
+				if (!this.#resize) {
+					this.#resize = new Resize(this.target as Element);
+					this.#observers.add(this.#resize);
+				}
+				this.#resize.on(name, fn);
+				break;
+
+			case 'intersect':
+				if (!this.#intersection) {
+					this.#intersection = new Intersection(this.target as Element, this.settings);
+					this.#observers.add(this.#intersection);
+				}
+				this.#intersection.on(name, fn);
+				break;
+
+			default:
+				break;
+		}
+	}
+
+	/**
+	 * `resume` (explicit)
+	 * @summary resume a suspended observer
+	 */
+	public resume() {
+		if (this.#isSuspended === false) {
+			console.warn('Obsidia: observer/s already running.');
+			return;
+		}
+
+		this.#observers.forEach(obs => {
+			obs.resume();
+		});
+
+		this.#isSuspended = false;
+	}
+
+	/**
+	 * `suspend` (explicit)
+	 * @summary suspend observation; reserves the right to resume
+	 */
+	public suspend() {
+		if (this.#isSuspended === true) {
+			console.warn('Obsidia: observer/s already suspended.');
+			return;
+		}
+
+		this.#observers.forEach(obs => {
+			obs.suspend();
+		});
+
+		this.#isSuspended = true;
+	}
+
+	/**
+	 * `toggle` (implicit)
+	 * @summary suspend or resume depending on observer state
+	 */
+	public toggle() {
+		this.#isSuspended ? this.resume() : this.suspend();
+	}
+
+	/**
+	 * `dump`
+	 * @summary end the process entirely and destroy the instance
+	 */
+	public dump() {
+		this.#observers.forEach(obs => {
+			obs.dump();
+		});
+
+		for (const prop in this) {
+			Object.hasOwn(this, prop) && delete this[prop];
+		}
+	}
+
+	public on<K extends OnKeys>(name: K, fn: Notify[K]): All<T, Exclude<OnKeys, K>> {
+		this.determine(name, fn);
+		return this;
+	}
+}
+
 /**
  * Prevents sub class prop assignments before their "registration" proper.
  * Seems to take precedence over a time-out.
@@ -235,6 +367,7 @@ function resolve<T = string>(msg: T) {
 
 // biome-ignore lint/suspicious/noExplicitAny: allow `any` where needed
 type Any = any;
+type ObserverType = MutationObserver | ResizeObserver | IntersectionObserver;
 
 // must include a user-facing default generic
 interface Notify<T = Obsidium> {
@@ -242,17 +375,20 @@ interface Notify<T = Obsidium> {
 	add: (this: T, nodes: NodeList, obs: Obsidium<'mutation'>) => void;
 	remove: (this: T, nodes: NodeList, obs: Obsidium<'mutation'>) => void;
 	mutate: (this: T, added: NodeList, removed: NodeList, obs: Obsidium<'mutation'>) => void;
-	resize: (this: T, entry: ResizeObserverEntry, obs: Obsidium<'resize'>) => void;
-	intersect: (this: T, entry: IntersectionObserverEntry, obs: Obsidium<'intersection'>) => void;
+	resize: (this: T, entry: ResizeObserverEntry[], obs: Obsidium<'resize'>) => void;
+	intersect: (this: T, entry: IntersectionObserverEntry[], obs: Obsidium<'intersection'>) => void;
 }
 
 export type Obsidium<T extends keyof typeof Obsidium = keyof typeof Obsidium> = ReturnType<(typeof Obsidium)[T]>;
+export type Obsidia = All<ObserverType>;
+// export type Obsidia = ReturnType<typeof Obsidia>;
+// export type Obsidia<T extends ObserverType = ObserverType> = All<T>;
 
-// tuple type: [<Observer entry>, <wrapper class>]
-type FromObserver<T extends IntersectionObserver | MutationObserver | ResizeObserver> = T extends IntersectionObserver
-	? [IntersectionObserverEntry, Intersection]
+// tuple type: [<Obs.entry>, <wrapper class>, <on.keys>] // oddly can't start with ResizeObserver
+type ByObs<T extends ObserverType | undefined> = T extends IntersectionObserver
+	? [IntersectionObserverEntry[], Intersection, 'intersect']
 	: T extends ResizeObserver
-		? [ResizeObserverEntry, Resize]
+		? [ResizeObserverEntry[], Resize, 'resize']
 		: T extends MutationObserver
-			? [MutationRecord[], Mutation]
-			: [never, Obsidium];
+			? [MutationRecord[], Mutation, 'add' | 'attr' | 'mutate' | 'remove']
+			: [never, Obsidium, never];

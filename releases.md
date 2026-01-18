@@ -1,11 +1,21 @@
-# Release notes: 1.2.0
-- notifer callbacks: return instance as final argument
-- precise `this` context for all notifer callbacks
+### Release notes
 
-# Release notes: 1.1.1
+## 2.0.0
+- **breaking:** pass the iterable over the individual entry,
+    - making subs more manageable, letting you iterate _within_ your callback;
+    - to achieve same with `mutation`, use `subscribe` method.
+- **new** feature! `Obsidia`: attach multiple observers to the same element at once
+- extensive type optimizations
+
+
+## 1.2.0
+- notifier callbacks: added instance as final parameter
+- precise `this` context for all notifier callbacks
+
+## 1.1.1
 - properly typed `this` context for all notifer callbacks
 
-# Release notes: 1.1.0
+## 1.1.0
 - precise types in `Notify` interface
 - better, less manual `Obsidium` type with generic
 - `.on()` return type excludes notifiers already used, when chained
@@ -14,4 +24,5 @@
 - export each wrapper class individually
 - crossed 80% unit test coverage!
 
-// register "obsidium.dev"
+## 1.0.0
+- initial release
