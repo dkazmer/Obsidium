@@ -1,6 +1,6 @@
 {
 	"name": "obsidium",
-	"version": "1.2.0",
+	"version": "2.0.0",
 	"description": "A declarative wrapper for all the JS observers.",
 	"main": "index.js",
 	"scripts": {
@@ -9,6 +9,10 @@
 		"build": "tsc -p tsconfig.pub.json && esbuild src/obsidium.ts --bundle --outfile=dist/index.js --format=esm --target=es2020 --minify",
 		"build:rm": "rm -rf dist && npm run build",
 		"coverage": "vitest --coverage"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/dkazmer/Obsidium.git"
 	},
 	"keywords": [
 		"javascript",
@@ -22,6 +26,10 @@
 	"author": "Daniel B. Kazmer <dkazmer@live.ca> (https://webshifted.com)",
 	"license": "GPL-3.0-only",
 	"type": "module",
+	"bugs": {
+		"url": "https://github.com/dkazmer/Obsidium/issues"
+	},
+	"homepage": "https://github.com/dkazmer/Obsidium#readme",
 	"devDependencies": {
 		"@biomejs/biome": "^2.3.8",
 		"@vitest/coverage-v8": "^4.0.15",
@@ -33,6 +41,5 @@
 	"types": "dist/obsidium.d.ts",
 	"files": [
 		"dist"
-	],
-	"homepage": "https://github.com/dkazmer/Obsidium"
+	]
 }
