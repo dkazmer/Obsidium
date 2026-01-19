@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noConsole: allow logging */
 import type { Mock } from 'vitest/dist/index';
 import { Obsidia, Obsidium } from './obsidium';
 
@@ -156,20 +157,53 @@ describe('Obsidia', () => {
 		expect<Obsidia>(obs).toBeTruthy();
 	});
 
-	it('should attach subscriber', () => {
+	it('should attach 2 subscribers', () => {
 		// @ts-expect-error (2345): private prop
 		const spy = vi.spyOn(obs, 'determine');
 
-		obs.on('intersect', () => {
-			console.log('>> Obsidia: intersected!');
-		});
+		obs
+			.on('intersect', () => {
+				console.log('>> Obsidia: intersected!');
+			})
+			.on('resize', () => {
+				console.log('>> Obsidia: resized!');
+			});
+
+		expect<Mock>(spy).toHaveBeenCalledTimes(2);
+	});
+
+	it('should suspend', () => {
+		// const o = obs.getObservers(1) as Obsidium;
+		const spy = vi.spyOn(obs, 'suspend');
+		obs.suspend();
+		expect<Mock>(spy).toHaveBeenCalledOnce();
+	});
+
+	it('should resume', () => {
+		// const o = obs.getObservers(1) as Obsidium;
+		const spy = vi.spyOn(obs, 'resume');
+		obs.resume();
+		expect<Mock>(spy).toHaveBeenCalledOnce();
+	});
+
+	it('should be selectively destroyed', () => {
+		// @ts-expect-error (2339): does not exist
+		const o = obs.getObservers(0) as Obsidium;
+		const spy = vi.spyOn(o, 'dump');
+
+		o.dump();
 
 		expect<Mock>(spy).toHaveBeenCalledOnce();
+		// @ts-expect-error (2341): private prop
+		expect(o.target).toBeUndefined();
+		// @ts-expect-error (2341): private prop
+		expect(obs.target).not.toBeUndefined();
 	});
 
 	it('should be destroyed', () => {
 		const spy = vi.spyOn(obs, 'dump');
 		obs.dump();
+
 		expect<Mock>(spy).toHaveBeenCalledOnce();
 		// @ts-expect-error (2341): private prop
 		expect(obs.target).toBeUndefined();

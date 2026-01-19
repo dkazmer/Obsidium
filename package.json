@@ -6,7 +6,7 @@
 	"scripts": {
 		"test": "vitest",
 		"start": "esbuild src/main.ts --bundle --sourcemap --watch --outfile=main.js --servedir=/",
-		"build": "tsc -p tsconfig.pub.json && esbuild src/obsidium.ts --bundle --outfile=dist/index.js --format=esm --target=es2020 --minify",
+		"build": "tsc -p tsconfig.pub.json && esbuild --define:process.env.NODE_ENV=\\\"\\\" src/obsidium.ts --bundle --outfile=dist/index.js --format=esm --target=es2020 --minify",
 		"build:rm": "rm -rf dist && npm run build",
 		"coverage": "vitest --coverage"
 	},
