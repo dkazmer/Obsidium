@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noConsole: test bed */
 import { Mutation, Obsidia, Obsidium } from './obsidium';
 
 const { resize, intersection } = Obsidium;
@@ -41,6 +42,14 @@ window.multi = Obsidia<IntersectionObserver | ResizeObserver>(document.body)
 	.on('intersect', ([ent]) => {
 		console.log('>> Obsidia: intersect', ent!.boundingClientRect);
 	})
-	.on('resize', ([ent]) => {
+	.on('resize', ([ent], _obs) => {
 		console.log('>> Obsidia: resize', ent!.contentBoxSize);
 	});
+
+declare global {
+	namespace NodeJS {
+		interface ProcessEnv {
+			NODE_ENV: 'development' | 'production' | 'test';
+		}
+	}
+}
