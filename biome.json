@@ -32,7 +32,9 @@
 				"noExplicitAny": "warn",
 				"noMisleadingInstantiator": "off",
 				"noShadowRestrictedNames": "off",
-				"noAssignInExpressions": "off"
+				"noAssignInExpressions": "off",
+				"noRedeclare": "off",
+				"noConsole": "warn"
 			}
 		}
 	},

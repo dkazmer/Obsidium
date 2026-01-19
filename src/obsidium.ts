@@ -99,7 +99,7 @@ abstract class Observer<T extends ObserverType, OnKeys extends keyof Notify = By
 	 */
 	public resume() {
 		if (this.#isSuspended === false) {
-			console.warn('Obsidium: observer is already running.');
+			warn('Obsidium: observer is already running.');
 			return;
 		}
 
@@ -116,7 +116,7 @@ abstract class Observer<T extends ObserverType, OnKeys extends keyof Notify = By
 	 */
 	public suspend() {
 		if (this.#isSuspended === true) {
-			console.warn('Obsidium: observer is already suspended.');
+			warn('Obsidium: observer is already suspended.');
 			return;
 		}
 
@@ -137,7 +137,7 @@ abstract class Observer<T extends ObserverType, OnKeys extends keyof Notify = By
 	 * @summary end the process entirely and destroy the instance
 	 */
 	public dump() {
-		this.observer.disconnect();
+		this.observer?.disconnect();
 
 		for (const prop in this) {
 			Object.hasOwn(this, prop) && delete this[prop];
@@ -153,7 +153,7 @@ abstract class Observer<T extends ObserverType, OnKeys extends keyof Notify = By
 		fn: Exclude<Notify<ByObs<T>[1]>[K], undefined>
 	): Observer<T, Exclude<OnKeys, K>> {
 		this.notify[name]
-			? console.warn(`Obsidium: a subscription already exists for <${name}> on this instance.`)
+			? warn(`Obsidium: a subscription already exists for <${name}> on this instance.`)
 			: (this.notify[name] = (...e: unknown[]) => fn.call(this as Any, ...(e as [Any, Any, Any]))); // Any's to avoid unnecessary, internal-facing TS gymnastics
 
 		return this;
@@ -165,7 +165,7 @@ abstract class Observer<T extends ObserverType, OnKeys extends keyof Notify = By
 	 */
 	public subscribe(fn: Exclude<typeof this.notifySub, undefined>): void {
 		this.notifySub
-			? console.warn('Obsidium: a <subscribe> notifier has already been created for this instance.')
+			? warn('Obsidium: a <subscribe> notifier has already been created for this instance.')
 			: (this.notifySub = e => fn.call(this as Any, e, this as Any)); // Any to avoid unnecessary, internal-facing TS gymnastics
 	}
 }
@@ -289,6 +289,9 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 			default:
 				break;
 		}
+
+		// @ts-expect-error (2339): does not exist
+		if (process?.env.NODE_ENV === 'test') this.o = this.#observers;
 	}
 
 	/**
@@ -297,7 +300,7 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 	 */
 	public resume() {
 		if (this.#isSuspended === false) {
-			console.warn('Obsidia: observer/s already running.');
+			warn('Obsidia: observer/s already running.');
 			return;
 		}
 
@@ -314,7 +317,7 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 	 */
 	public suspend() {
 		if (this.#isSuspended === true) {
-			console.warn('Obsidia: observer/s already suspended.');
+			warn('Obsidia: observer/s already suspended.');
 			return;
 		}
 
@@ -362,6 +365,11 @@ function resolve<T = string>(msg: T) {
 	return new Promise<T>(res => res(msg));
 }
 
+function warn(msg: string) {
+	// biome-ignore lint/suspicious/noConsole: allow console.warn
+	console.warn(msg);
+}
+
 // -----------------------------------------------------------------------------------------------------
 // types
 
@@ -392,3 +400,21 @@ type ByObs<T extends ObserverType | undefined> = T extends IntersectionObserver
 		: T extends MutationObserver
 			? [MutationRecord[], Mutation, 'add' | 'attr' | 'mutate' | 'remove']
 			: [never, Obsidium, never];
+
+// -----------------------------------------------------------------------------------------------------
+// unit test
+
+if (process?.env.NODE_ENV === 'test') {
+	// @ts-expect-error (2339): does not exist
+	All.prototype.getObservers = function (
+		at?: number
+	): Mutation | Resize | Intersection | (Mutation | Resize | Intersection)[] {
+		const o: Any = [];
+		// @ts-expect-error (2339): does not exist
+		this.o.forEach(x => {
+			o.push(x);
+		});
+
+		return at === undefined ? o : o.at(at);
+	};
+}
