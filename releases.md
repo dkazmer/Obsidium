@@ -1,5 +1,11 @@
 ### Release notes
 
+## 3.0.0
+- **breaking:** absorbed `obsidia` into flagship `Obsidium`.
+	- the differentiating factor resulting in two modes:
+		- _Method mode:_ the OG `Obsidium[method](el)` and
+		- _Function mode:_ `Obsidium(el)` (see [README > Advanced](https://github.com/dkazmer/Obsidium/?tab=readme-ov-file#advanced))
+
 ## 2.0.0
 - **breaking:** pass the iterable over the individual entry,
     - making subs more manageable, letting you iterate _within_ your callback;

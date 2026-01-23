@@ -1,5 +1,5 @@
 /**
- * Declarative wrapper for the JS observers: `Obsidium.method(el)`...
+ * Declarative wrapper for the JS observers: `Obsidium[method](el)`...
  * - {@linkcode Obsidium.mutation|mutation} _MutationObserver_
  * - {@linkcode Obsidium.resize|resize} _ResizeObserver_
  * - {@linkcode Obsidium.intersection|intersection} _IntersectionObserver_
@@ -10,7 +10,7 @@
  *   .on('resize', resizeFn);
  * @author Daniel B. Kazmer
  * @version 3.0.0
- * @see {@link https://github.com/dkazmer/Obsidium|GitHub}
+ * @see {@link https://github.com/dkazmer/Obsidium#readme|README}
  */
 export function Obsidium<T extends ObserverType>(
 	target: T extends MutationObserver ? Node : Element,
@@ -216,10 +216,9 @@ export class Mutation extends Observer<MutationObserver> {
 						const { addedNodes, removedNodes } = mutation;
 						addedNodes.length && this.notify.add?.(addedNodes, this);
 						removedNodes.length && this.notify.remove?.(removedNodes, this);
-						(addedNodes.length || removedNodes.length) && this.notify.mutate?.(addedNodes, removedNodes, this)
+						(addedNodes.length || removedNodes.length) && this.notify.mutate?.(addedNodes, removedNodes, this);
 					} break;
 
-					// biome-ignore format: compact
 					case 'attributes': {
 						const { target: t, attributeName } = mutation;
 						this.notify.attr?.({ attribute: attributeName, target: t }, this);

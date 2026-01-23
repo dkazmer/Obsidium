@@ -51,14 +51,14 @@ Method | Desc.
 The generic default settings are set for each observer, which can be optionally overridden via the second argument of the wrapped constructor, specific to the chosen observer type. **Caveat:** `resize` has no such settings arg. as it's not complex enough to need it.
 
 ```ts
-const myObs: Obsidium = Obsidium[name](element, options?);
+const myObs: Obsidium = Obsidium[method](element, options?);
 ```
 
 ### Advanced
 
 - use the alternatively available `subscribe` method
 - find the `Obsidium` instance object as an additional callback parameter
-- attach multiple observers to the same element at once with `Obsidia`
+- attach multiple observers to the same element at once with [Fn mode](https://github.com/dkazmer/Obsidium/wiki/Code-examples#Fn-mode)
 - import only the wrapper class you need for optimal _tree shaking_
 
 ---
