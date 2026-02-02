@@ -1,14 +1,24 @@
 /**
- * Declarative wrapper functions for the JS observers:
+ * Declarative wrapper for the JS observers: `Obsidium[method](el)`...
  * - {@linkcode Obsidium.mutation|mutation} _MutationObserver_
  * - {@linkcode Obsidium.resize|resize} _ResizeObserver_
  * - {@linkcode Obsidium.intersection|intersection} _IntersectionObserver_
- * @summary Created to encourage greater use of these high-value JS utilities,
- * as they're vastly underused and unknown, largely due to their complex implementation strategy.
+ * @summary Created to encourage greater use of these valuable JS utilities.
+ * @example
+ * Obsidium(element) // fn mode
+ *   .on('mutate', mutateFn)
+ *   .on('resize', resizeFn);
  * @author Daniel B. Kazmer
- * @version 2.0.0
- * @see {@link https://github.com/dkazmer/Obsidium|GitHub}
+ * @version 3.0.0
+ * @see {@link https://github.com/dkazmer/Obsidium#readme|README}
  */
+export function Obsidium<T extends ObserverType>(
+	target: T extends MutationObserver ? Node : Element,
+	settings?: MutationObserverInit & IntersectionObserverInit
+) {
+	return new All<T>(target, settings);
+}
+
 export namespace Obsidium {
 	/**
 	 * Declarative wrapper for `IntersectionObserver`. Control methods:
@@ -50,25 +60,6 @@ export namespace Obsidium {
 	export function mutation(target: Node, settings?: MutationObserverInit) {
 		return new Mutation(target, settings);
 	}
-}
-
-/**
- * Declarative wrapper for _any / all_ of the three major JS observers. Control methods:
- * - {@linkcode All.suspend|suspend}
- * - {@linkcode All.resume|resume}
- * - {@linkcode All.toggle|toggle}
- * - {@linkcode All.dump|dump}
- * @summary Good for attaching multiple observers to the same element at once.
- * @example
- * Obsidia(element)
- *   .on('mutate', mutateFn)
- *   .on('resize', resizeFn);
- */
-export function Obsidia<T extends ObserverType>(
-	target: T extends MutationObserver ? Node : Element,
-	settings?: MutationObserverInit & IntersectionObserverInit
-) {
-	return new All<T>(target, settings);
 }
 
 // -----------------------------------------------------------------------------------------------------
@@ -225,10 +216,9 @@ export class Mutation extends Observer<MutationObserver> {
 						const { addedNodes, removedNodes } = mutation;
 						addedNodes.length && this.notify.add?.(addedNodes, this);
 						removedNodes.length && this.notify.remove?.(removedNodes, this);
-						(addedNodes.length || removedNodes.length) && this.notify.mutate?.(addedNodes, removedNodes, this)
+						(addedNodes.length || removedNodes.length) && this.notify.mutate?.(addedNodes, removedNodes, this);
 					} break;
 
-					// biome-ignore format: compact
 					case 'attributes': {
 						const { target: t, attributeName } = mutation;
 						this.notify.attr?.({ attribute: attributeName, target: t }, this);
@@ -244,13 +234,18 @@ export class Mutation extends Observer<MutationObserver> {
 }
 
 class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
-	// implements Observer<ObserverType, OnKeys>
+	// ...implements Observer<ObserverType, OnKeys> {
+	// @ts-expect-error (6133): see ignore msg
+	// biome-ignore lint/correctness/noUnusedPrivateClassMembers: used only for type discrimination on instantiation.
+	#allowedType!: T;
+
 	#mutation?: Mutation;
 	#resize?: Resize;
 	#intersection?: Intersection;
 
 	#isSuspended = true;
-	#observers = new Set<Mutation | Resize | Intersection>();
+	#observers = new Set<ByObs<T>[1]>();
+	// #observers = new Set<Mutation | Resize | Intersection>();
 
 	constructor(
 		private target: Node | Element,
@@ -291,7 +286,7 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 		}
 
 		// @ts-expect-error (2339): does not exist
-		if (process?.env.NODE_ENV === 'test') this.o = this.#observers;
+		if ('process' in globalThis && process?.env.NODE_ENV === 'test') this.o = this.#observers;
 	}
 
 	/**
@@ -379,16 +374,19 @@ type ObserverType = MutationObserver | ResizeObserver | IntersectionObserver;
 
 // must include a user-facing default generic
 interface Notify<T = Obsidium> {
-	attr: (this: T, obj: { attribute: string | null; target: Node }, obs: Obsidium<'mutation'>) => void;
-	add: (this: T, nodes: NodeList, obs: Obsidium<'mutation'>) => void;
-	remove: (this: T, nodes: NodeList, obs: Obsidium<'mutation'>) => void;
-	mutate: (this: T, added: NodeList, removed: NodeList, obs: Obsidium<'mutation'>) => void;
-	resize: (this: T, entry: ResizeObserverEntry[], obs: Obsidium<'resize'>) => void;
-	intersect: (this: T, entry: IntersectionObserverEntry[], obs: Obsidium<'intersection'>) => void;
+	attr: (this: T, obj: { attribute: string | null; target: Node }, obs: Obsidium<MutationObserver>) => void;
+	add: (this: T, nodes: NodeList, obs: Obsidium<MutationObserver>) => void;
+	remove: (this: T, nodes: NodeList, obs: Obsidium<MutationObserver>) => void;
+	mutate: (this: T, added: NodeList, removed: NodeList, obs: Obsidium<MutationObserver>) => void;
+	resize: (this: T, entry: ResizeObserverEntry[], obs: Obsidium<ResizeObserver>) => void;
+	intersect: (this: T, entry: IntersectionObserverEntry[], obs: Obsidium<IntersectionObserver>) => void;
 }
 
-export type Obsidium<T extends keyof typeof Obsidium = keyof typeof Obsidium> = ReturnType<(typeof Obsidium)[T]>;
-export type Obsidia = All<ObserverType>;
+export type Obsidium<T extends ObserverType = ObserverType> = ByObs<T>[1] | All<T>;
+
+// export type Obsidium<T extends keyof typeof Obsidium = keyof typeof Obsidium> = ReturnType<(typeof Obsidium)[T]>;
+// export type Obsidia = All<ObserverType>;
+
 // export type Obsidia = ReturnType<typeof Obsidia>;
 // export type Obsidia<T extends ObserverType = ObserverType> = All<T>;
 
@@ -404,7 +402,7 @@ type ByObs<T extends ObserverType | undefined> = T extends IntersectionObserver
 // -----------------------------------------------------------------------------------------------------
 // unit test
 
-if (process?.env.NODE_ENV === 'test') {
+if ('process' in globalThis && process?.env.NODE_ENV === 'test') {
 	// @ts-expect-error (2339): does not exist
 	All.prototype.getObservers = function (
 		at?: number
