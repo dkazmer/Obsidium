@@ -23,6 +23,11 @@ declare global {
 
 	var multi: Obsidium<ResizeObserver>;
 	// var multi2: Obsidia;
+	namespace NodeJS {
+		interface ProcessEnv {
+			NODE_ENV: 'development' | 'production' | 'test';
+		}
+	}
 }
 
 /* window.mo.on('add', entry => {
@@ -40,16 +45,8 @@ window.ro.subscribe(function (entry) {
 
 window.multi = Obsidium<ResizeObserver | IntersectionObserver>(document.body)
 	.on('intersect', ([ent]) => {
-		console.log('>> Obsidia: intersect', ent!.boundingClientRect);
+		console.log('>> Obsidium(): intersect', ent!.boundingClientRect);
 	})
 	.on('resize', ([ent], _obs) => {
-		console.log('>> Obsidia: resize', ent!.contentBoxSize);
+		console.log('>> Obsidium(): resize', ent!.contentBoxSize);
 	});
-
-declare global {
-	namespace NodeJS {
-		interface ProcessEnv {
-			NODE_ENV: 'development' | 'production' | 'test';
-		}
-	}
-}

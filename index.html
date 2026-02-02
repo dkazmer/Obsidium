@@ -1,55 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Obsidium</title>
-    <script src="./main.js" type="module" defer></script>
-    <style>
-        body, html {
-            background-color: #334;
-            color: #cbb;
-            line-height: 2rem;
-            font-size: 1.2rem;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-        }
-        body > * {
-            margin-inline: auto;
-        }
-        h1 {
-            display: none;
-        }
-        p:first-child::before {
-            content: 'Obsidium';
-            text-shadow: 2px 2px 4px #112;
-            font-size: 3rem;
-            font-weight: 500;
-            /* margin-top: 0; */
-            margin-bottom: 39px;
-            display: block;
-        }
-        .rationale {
-            display: flex;
-            gap: 2em;
-            width: 1024px;
-        }
-        .rationale > p {
-            flex: 1;
-        }
-        code {
-            background-color: #112;
-            padding-inline: 5px;
-            border-radius: 5px;
-            color: orange;
-        }
-    </style>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Obsidium</title>
+	<script src="./main.js" type="module" defer></script>
+	<style>
+		body,
+		html {
+			background-color: #334;
+			color: #cbb;
+			line-height: 2rem;
+			font-size: 1.2rem;
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+		}
+
+		body>* {
+			margin-inline: auto;
+		}
+
+		h1 {
+			display: none;
+		}
+
+		p:first-child::before {
+			content: 'Obsidium';
+			text-shadow: 2px 2px 4px #112;
+			font-size: 3rem;
+			font-weight: 500;
+			/* margin-top: 0; */
+			margin-bottom: 39px;
+			display: block;
+		}
+
+		.rationale {
+			display: flex;
+			gap: 2em;
+			width: 1024px;
+		}
+
+		.rationale>p {
+			flex: 1;
+		}
+
+		code {
+			background-color: #112;
+			padding-inline: 5px;
+			border-radius: 5px;
+			color: orange;
+		}
+	</style>
 </head>
+
 <body>
-    <h1>Obsidium</h1>
-    <div class="rationale">
-        <p>Created to encourage greater use of these high-value JS utilities, as they're vastly unknown and criminally underused, largely due to their complex implementation strategy.</p>
-        <p>I found that every time I wanted to use one or more of them, I'd have to go out of my way to research and refresh my understanding thereof. Moreover, there are subtle differences in their implementation between them that's just annoying.</p>
-        <p>I really just want to set it and forget it. <code>Obsidium</code> allows you to do just that…in a strongly typed, consolidated way. The idea is to instantiate the desired type of observer, then subscribe to it via <code>.on(…)</code>.</p>
-    </div>
+	<h1>Obsidium</h1>
+	<div class="rationale">
+		<p>Created to encourage greater use of these high-value JS utilities, as they're vastly unknown and criminally
+			underused, largely due to their complex implementation strategy.</p>
+		<p>I found that every time I wanted to use one or more of them, I'd have to go out of my way to research and
+			refresh my understanding thereof. Moreover, there are subtle differences in their implementation between
+			them that's just annoying.</p>
+		<p>I really just want to set it and forget it. <code>Obsidium</code> allows you to do just that…in a strongly
+			typed, consolidated way. The idea is to instantiate the desired type of observer, then subscribe to it via
+			<code>.on(…)</code>.
+		</p>
+	</div>
 </body>
+
 </html>

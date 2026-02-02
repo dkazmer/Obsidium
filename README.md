@@ -58,7 +58,7 @@ const myObs: Obsidium = Obsidium[method](element, options?);
 
 - use the alternatively available `subscribe` method
 - find the `Obsidium` instance object as an additional callback parameter
-- attach multiple observers to the same element at once with [Fn mode](https://github.com/dkazmer/Obsidium/wiki/Code-examples#Fn-mode)
+- attach multiple observers to the same element at once with [Fn mode](https://github.com/dkazmer/Obsidium/wiki/Code-examples#function-mode)
 - import only the wrapper class you need for optimal _tree shaking_
 
 ---

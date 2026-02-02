@@ -286,7 +286,7 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 		}
 
 		// @ts-expect-error (2339): does not exist
-		if (process?.env.NODE_ENV === 'test') this.o = this.#observers;
+		if ('process' in globalThis && process?.env.NODE_ENV === 'test') this.o = this.#observers;
 	}
 
 	/**
@@ -402,7 +402,7 @@ type ByObs<T extends ObserverType | undefined> = T extends IntersectionObserver
 // -----------------------------------------------------------------------------------------------------
 // unit test
 
-if (process?.env.NODE_ENV === 'test') {
+if ('process' in globalThis && process?.env.NODE_ENV === 'test') {
 	// @ts-expect-error (2339): does not exist
 	All.prototype.getObservers = function (
 		at?: number

@@ -1,10 +1,10 @@
 ### Release notes
 
 ## 3.0.0
-- **breaking:** absorbed `obsidia` into flagship `Obsidium`.
+- **breaking:** absorbed `Obsidia` into flagship `Obsidium`.
 	- the differentiating factor resulting in two modes:
 		- _Method mode:_ the OG `Obsidium[method](el)` and
-		- _Function mode:_ `Obsidium(el)` (see [README > Advanced](https://github.com/dkazmer/Obsidium/?tab=readme-ov-file#advanced))
+		- _Function mode:_ `Obsidium(el)` --- _see [code examples](https://github.com/dkazmer/Obsidium/wiki/Code-examples)_
 
 ## 2.0.0
 - **breaking:** pass the iterable over the individual entry,
@@ -12,7 +12,6 @@
     - to achieve same with `mutation`, use `subscribe` method.
 - **new** feature! `Obsidia`: attach multiple observers to the same element at once
 - extensive type optimizations
-
 
 ## 1.2.0
 - notifier callbacks: added instance as final parameter
