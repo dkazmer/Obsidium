@@ -1,6 +1,6 @@
 /** biome-ignore-all lint/suspicious/noConsole: allow logging */
 import type { Mock } from 'vitest/dist/index';
-import { Obsidia, Obsidium } from './obsidium';
+import { Obsidium } from './obsidium';
 
 const mockMethods = {
 	mo<T extends NodeList | MoAttr>(_arg: T) {
@@ -14,7 +14,7 @@ const mockMethods = {
 	}
 };
 
-describe('Mutation Observer', () => {
+describe('Method: mutation', () => {
 	const elem = mockDOM();
 	const mo = Obsidium.mutation(elem);
 
@@ -83,7 +83,7 @@ describe('Mutation Observer', () => {
 	});
 });
 
-describe('Resize Observer', () => {
+describe('Method: resize', () => {
 	const elem = mockDOM();
 	const ro = Obsidium.resize(elem);
 
@@ -122,7 +122,7 @@ describe('Resize Observer', () => {
 	});
 });
 
-describe('Intersection Observer', () => {
+describe('Method: intersection', () => {
 	const elem = mockDOM();
 	const io = Obsidium.intersection(elem);
 
@@ -149,12 +149,12 @@ describe('Intersection Observer', () => {
 	});
 });
 
-describe('Obsidia', () => {
+describe('Fn mode', () => {
 	const elem = mockDOM();
-	const obs = Obsidia(elem);
+	const obs = Obsidium(elem);
 
 	it('should create', () => {
-		expect<Obsidia>(obs).toBeTruthy();
+		expect<Obsidium>(obs).toBeTruthy();
 	});
 
 	it('should attach 2 subscribers', () => {

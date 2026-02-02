@@ -1,7 +1,7 @@
 /** biome-ignore-all lint/suspicious/noConsole: test bed */
-import { Mutation, Obsidia, Obsidium } from './obsidium';
+import { Mutation, Obsidium } from './obsidium';
 
-const { resize, intersection } = Obsidium;
+const { resize } = Obsidium;
 
 window.mo = new Mutation(document.body)
 	.on('add', nodes => console.log('>> added!', nodes))
@@ -12,17 +12,22 @@ window.mo = new Mutation(document.body)
 
 window.ro = resize(document.body).on('resize', ([ent]) => console.log('>> resized!', ent!.contentBoxSize));
 
-window.io = intersection(document.body).on('intersect', function ([ent], _obs) {
+window.io = Obsidium.intersection(document.body).on('intersect', function ([ent], _obs) {
 	console.log('>> intersected!', ent!.isIntersecting, this.dump);
 });
 
 declare global {
 	var mo: Obsidium;
 	var ro: Obsidium;
-	var io: Obsidium<'intersection'>;
+	var io: Obsidium<IntersectionObserver>;
 
-	var multi: Obsidia;
+	var multi: Obsidium<ResizeObserver>;
 	// var multi2: Obsidia;
+	namespace NodeJS {
+		interface ProcessEnv {
+			NODE_ENV: 'development' | 'production' | 'test';
+		}
+	}
 }
 
 /* window.mo.on('add', entry => {
@@ -38,18 +43,10 @@ window.ro.subscribe(function (entry) {
 });
  */
 
-window.multi = Obsidia<IntersectionObserver | ResizeObserver>(document.body)
+window.multi = Obsidium<ResizeObserver | IntersectionObserver>(document.body)
 	.on('intersect', ([ent]) => {
-		console.log('>> Obsidia: intersect', ent!.boundingClientRect);
+		console.log('>> Obsidium(): intersect', ent!.boundingClientRect);
 	})
 	.on('resize', ([ent], _obs) => {
-		console.log('>> Obsidia: resize', ent!.contentBoxSize);
+		console.log('>> Obsidium(): resize', ent!.contentBoxSize);
 	});
-
-declare global {
-	namespace NodeJS {
-		interface ProcessEnv {
-			NODE_ENV: 'development' | 'production' | 'test';
-		}
-	}
-}
