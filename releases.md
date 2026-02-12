@@ -1,5 +1,9 @@
 ### Release notes
 
+## 3.1.0
+- added `state` getter
+- unused code stripping, further reducing file size (Bun powered)
+
 ## 3.0.0
 - **breaking:** absorbed `Obsidia` into flagship `Obsidium`.
 	- the differentiating factor resulting in two modes:
