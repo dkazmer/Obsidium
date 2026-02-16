@@ -1,7 +1,7 @@
 ### Release notes
 
 ## 3.1.0
-- added `state` getter
+- added read-only state tracker: `instance.state`
 - unused code stripping, further reducing file size (Bun powered)
 
 ## 3.0.0
