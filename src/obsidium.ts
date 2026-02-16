@@ -9,7 +9,7 @@
  *   .on('mutate', mutateFn)
  *   .on('resize', resizeFn);
  * @author Daniel B. Kazmer
- * @version 3.0.0
+ * @version 3.1.0
  * @see {@link https://github.com/dkazmer/Obsidium#readme|README}
  */
 export function Obsidium<T extends ObserverType>(
@@ -159,6 +159,10 @@ abstract class Observer<T extends ObserverType, OnKeys extends keyof Notify = By
 			? warn('Obsidium: a <subscribe> notifier has already been created for this instance.')
 			: (this.notifySub = e => fn.call(this as Any, e, this as Any)); // Any to avoid unnecessary, internal-facing TS gymnastics
 	}
+
+	public get state() {
+		return this.#isSuspended ? 'suspended' : 'observing...';
+	}
 }
 
 export class Intersection extends Observer<IntersectionObserver> {
@@ -286,7 +290,7 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 		}
 
 		// @ts-expect-error (2339): does not exist
-		if ('process' in globalThis && process?.env.NODE_ENV === 'test') this.o = this.#observers;
+		if (process.env.NODE_ENV === 'test') this.o = this.#observers;
 	}
 
 	/**
@@ -349,6 +353,10 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 		this.determine(name, fn);
 		return this;
 	}
+
+	public get state() {
+		return this.#isSuspended ? 'suspended' : 'observing...';
+	}
 }
 
 /**
@@ -402,7 +410,7 @@ type ByObs<T extends ObserverType | undefined> = T extends IntersectionObserver
 // -----------------------------------------------------------------------------------------------------
 // unit test
 
-if ('process' in globalThis && process?.env.NODE_ENV === 'test') {
+if (process.env.NODE_ENV === 'test') {
 	// @ts-expect-error (2339): does not exist
 	All.prototype.getObservers = function (
 		at?: number

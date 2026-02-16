@@ -1,16 +1,16 @@
 {
 	"name": "obsidium",
-	"version": "3.0.0",
+	"version": "3.1.0",
 	"description": "A declarative wrapper for all the JS observers.",
 	"main": "index.js",
 	"scripts": {
 		"test": "vitest",
 		"start": "esbuild src/main.ts --bundle --sourcemap --watch --outfile=main.js --servedir=/",
 		"build": "tsc -p tsconfig.pub.json && esbuild --define:process.env.NODE_ENV=\\\"\\\" src/obsidium.ts --bundle --outfile=dist/index.js --format=esm --target=es2020 --minify",
-		"bundle": "tsc -p tsconfig.pub.json && bun build src/obsidium.ts --outfile=dist/index.js --minify",
+		"bundle": "tsc -p tsconfig.pub.json && bun build src/obsidium.ts --outfile=dist/index.js --minify --define=process.env.NODE_ENV:'\"production\"' --define=globalThis.process:undefined",
 		"build:rm": "rm -rf dist && npm run build",
 		"coverage": "vitest --coverage",
-		"bun": "bun build src/main.ts --sourcemap=external --watch --hot --outdir=."
+		"bun": "bun build src/main.ts --sourcemap=linked --watch --hot --outdir=. --define=process.env.NODE_ENV:'\"development\"'"
 	},
 	"repository": {
 		"type": "git",
