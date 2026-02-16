@@ -161,7 +161,7 @@ abstract class Observer<T extends ObserverType, OnKeys extends keyof Notify = By
 	}
 
 	public get state() {
-		return this.#isSuspended ? 'suspended' : 'active';
+		return this.#isSuspended ? 'suspended' : 'observing...';
 	}
 }
 
@@ -355,7 +355,7 @@ class All<T extends ObserverType, OnKeys extends keyof Notify = ByObs<T>[2]> {
 	}
 
 	public get state() {
-		return this.#isSuspended ? 'suspended' : 'active';
+		return this.#isSuspended ? 'suspended' : 'observing...';
 	}
 }
 
