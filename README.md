@@ -7,11 +7,11 @@ Created to encourage greater use of these high-value JS utilities, as they're va
 
 Moreover, there are subtle differences in their implementation between them that are somewhat irritating. I really just want to _set it and forget it._ `Obsidium` allows you to do just that…in a strongly typed, consolidated way.
 
-Obs. name | wraps…
+<!--Obs. name | wraps…
 --------- | --------
 `mutation` | `MutationObserver`
 `resize` | `ResizeObserver`
-`intersection` | `IntersectionObserver`
+`intersection` | `IntersectionObserver`-->
 
 ### Usage
 
@@ -21,12 +21,15 @@ Implementation examples (not exhaustive):
 ```ts
 import { Obsidium } from 'obsidium';
 
+// MutationObserver
 Obsidium.mutation(scopeElement)
 	.on('add', addFn)
 	.on('remove', removeFn);
 
+// ResizeObserver
 Obsidium.resize(element).on('resize', resizeFn);
 
+// IntersectionObserver
 Obsidium.intersection(element)
 	.on('intersect', function ([entry]) {
 		this.dump();

@@ -9,7 +9,7 @@
  *   .on('mutate', mutateFn)
  *   .on('resize', resizeFn);
  * @author Daniel B. Kazmer
- * @version 3.1.0
+ * @version 3.1.1
  * @see {@link https://github.com/dkazmer/Obsidium#readme|README}
  */
 export function Obsidium<T extends ObserverType>(
@@ -19,48 +19,46 @@ export function Obsidium<T extends ObserverType>(
 	return new All<T>(target, settings);
 }
 
-export namespace Obsidium {
-	/**
-	 * Declarative wrapper for `IntersectionObserver`. Control methods:
-	 * - {@linkcode Observer.suspend|suspend}
-	 * - {@linkcode Observer.resume|resume}
-	 * - {@linkcode Observer.toggle|toggle}
-	 * - {@linkcode Observer.dump|dump}
-	 * @example
-	 * Obsidium.intersection(element).on('intersect', callbackFn);
-	 */
-	export function intersection(target: Element, settings?: IntersectionObserverInit) {
-		return new Intersection(target, settings);
-	}
+/**
+ * Declarative wrapper for `IntersectionObserver`. Control methods:
+ * - {@linkcode Observer.suspend|suspend}
+ * - {@linkcode Observer.resume|resume}
+ * - {@linkcode Observer.toggle|toggle}
+ * - {@linkcode Observer.dump|dump}
+ * @example
+ * Obsidium.intersection(element).on('intersect', callbackFn);
+ */
+Obsidium.intersection = (target: Element, settings?: IntersectionObserverInit) => {
+	return new Intersection(target, settings);
+};
 
-	/**
-	 * Declarative wrapper for `ResizeObserver`. Control methods:
-	 * - {@linkcode Observer.suspend|suspend}
-	 * - {@linkcode Observer.resume|resume}
-	 * - {@linkcode Observer.toggle|toggle}
-	 * - {@linkcode Observer.dump|dump}
-	 * @example
-	 * Obsidium.resize(element).on('resize', callbackFn);
-	 */
-	export function resize(target: Element) {
-		return new Resize(target);
-	}
+/**
+ * Declarative wrapper for `ResizeObserver`. Control methods:
+ * - {@linkcode Observer.suspend|suspend}
+ * - {@linkcode Observer.resume|resume}
+ * - {@linkcode Observer.toggle|toggle}
+ * - {@linkcode Observer.dump|dump}
+ * @example
+ * Obsidium.resize(element).on('resize', callbackFn);
+ */
+Obsidium.resize = (target: Element) => {
+	return new Resize(target);
+};
 
-	/**
-	 * Declarative wrapper for `MutationObserver`. Control methods:
-	 * - {@linkcode Observer.suspend|suspend}
-	 * - {@linkcode Observer.resume|resume}
-	 * - {@linkcode Observer.toggle|toggle}
-	 * - {@linkcode Observer.dump|dump}
-	 * @example
-	 * Obsidium.mutation(scopeElement)
-	 *   .on('add', addFn)
-	 *   .on('remove', removeFn);
-	 */
-	export function mutation(target: Node, settings?: MutationObserverInit) {
-		return new Mutation(target, settings);
-	}
-}
+/**
+ * Declarative wrapper for `MutationObserver`. Control methods:
+ * - {@linkcode Observer.suspend|suspend}
+ * - {@linkcode Observer.resume|resume}
+ * - {@linkcode Observer.toggle|toggle}
+ * - {@linkcode Observer.dump|dump}
+ * @example
+ * Obsidium.mutation(scopeElement)
+ *   .on('add', addFn)
+ *   .on('remove', removeFn);
+ */
+Obsidium.mutation = (target: Node, settings?: MutationObserverInit) => {
+	return new Mutation(target, settings);
+};
 
 // -----------------------------------------------------------------------------------------------------
 // classes
